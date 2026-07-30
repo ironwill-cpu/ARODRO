@@ -133,6 +133,12 @@ router.get('/products/new', async (req, res) => {
 
 router.post('/products/new', async (req, res) => {
   try {
+    // Auto-generate slug if not provided
+    if (!req.body.slug || !req.body.slug.trim()) {
+      req.body.slug = req.body.name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'product-' + Date.now();
+    }
     await db.createProduct(req.body);
     res.redirect('/admin/products');
   } catch (err) {
@@ -162,6 +168,16 @@ router.get('/products/edit/:id', async (req, res) => {
 
 router.post('/products/edit/:id', async (req, res) => {
   try {
+    // Auto-generate slug if not provided
+    if (!req.body.slug || !req.body.slug.trim()) {
+      req.body.slug = req.body.name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'product-' + Date.now();
+    }
+    // Handle image removal: if image is empty string, explicitly set to null
+    if (req.body.image === '') {
+      req.body.image = null;
+    }
     await db.updateProduct(req.params.id, req.body);
     res.redirect('/admin/products');
   } catch (err) {

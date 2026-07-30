@@ -11,9 +11,10 @@
 
     <div class="product-detail">
       <div class="product-gallery">
-        <div class="product-main-image">
+        <!-- Main image -->
+        <div class="product-main-image" id="productMainImage">
           <% if (product.image) { %>
-            <img src="<%= product.image %>" alt="<%= product.name %>" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">
+            <img src="<%= product.image %>" alt="<%= product.name %>" id="mainProductImg" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">
           <% } else { %>
             <div class="product-placeholder large" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
               <i class="fas fa-gem"></i>
@@ -23,6 +24,34 @@
             <span class="product-badge sale">Sale</span>
           <% } %>
         </div>
+
+        <!-- Gallery thumbnails -->
+        <%
+          let productGallery = [];
+          if (product) {
+            try { productGallery = JSON.parse(product.images || '[]'); } catch(e) {}
+          }
+        %>
+        <% if (productGallery.length > 0) { %>
+          <div class="product-thumbnails">
+            <% if (product.image) { %>
+              <div class="thumb-item active" onclick="switchImage('<%= product.image %>', this)">
+                <img src="<%= product.image %>" alt="">
+              </div>
+            <% } %>
+            <% productGallery.forEach((img, idx) => { %>
+              <div class="thumb-item" onclick="switchImage('<%= img %>', this)">
+                <img src="<%= img %>" alt="Gallery <%= idx+1 %>">
+              </div>
+            <% }); %>
+          </div>
+        <% } else if (product.image) { %>
+          <div class="product-thumbnails single-thumb">
+            <div class="thumb-item active">
+              <img src="<%= product.image %>" alt="">
+            </div>
+          </div>
+        <% } %>
       </div>
 
       <div class="product-detail-info">
@@ -231,8 +260,58 @@
   </section>
 <% } %>
 
-<!-- Scripts -->
+<style>
+.product-thumbnails {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.product-thumbnails.single-thumb {
+  justify-content: center;
+}
+.thumb-item {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e8ddd5;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+}
+.thumb-item:hover,
+.thumb-item.active {
+  border-color: var(--color-primary, #a63737);
+  box-shadow: 0 2px 8px rgba(166,55,55,0.15);
+}
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>
+
 <script>
+function switchImage(url, el) {
+  const mainImg = document.getElementById('mainProductImg');
+  const mainDiv = document.getElementById('productMainImage');
+  if (!mainDiv) return;
+  
+  // Update main image
+  if (mainImg) {
+    mainImg.src = url;
+  } else {
+    // Replace placeholder with image
+    mainDiv.innerHTML = '<img src="' + url + '" alt="" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" id="mainProductImg">'
+      + (mainDiv.querySelector('.product-badge') ? mainDiv.querySelector('.product-badge').outerHTML : '');
+  }
+  
+  // Update active state
+  document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Load variants for this product
   fetch('/variants/<%= product.id %>')

@@ -16,6 +16,11 @@
           <input type="text" name="name" class="form-input" required value="<%= product ? product.name : '' %>" placeholder="Product name">
         </div>
         <div class="form-group">
+          <label>Slug</label>
+          <input type="text" name="slug" class="form-input" value="<%= product ? product.slug : '' %>" placeholder="Auto-generated if empty">
+          <small style="color: var(--color-text-light);">Leave empty for auto-generate from name</small>
+        </div>
+        <div class="form-group">
           <label>Category</label>
           <select name="category_id" class="form-input">
             <option value="">Select Category</option>
@@ -71,54 +76,136 @@
         <input type="text" name="ingredients" class="form-input" value="<%= product ? product.ingredients : '' %>" placeholder="e.g., Vitamin C, Hyaluronic Acid, ...">
       </div>
 
-      <!-- Image Upload Section -->
+      <!-- ======= SINGLE IMAGE (Main Product Image) ======= -->
       <div class="form-group">
-        <label>Product Image</label>
+        <label>Main Product Image</label>
+        
+        <!-- Current image display with remove button -->
+        <div id="currentImageSection" class="current-image-section" style="<%= product && product.image ? '' : 'display:none' %>">
+          <div class="current-image-wrapper">
+            <img src="<%= product ? product.image : '' %>" id="currentMainImage" alt="Current product image" class="current-preview-img">
+            <button type="button" class="img-remove-btn" id="removeCurrentImage" title="Remove this image">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+          <p class="current-image-label">Current main image</p>
+        </div>
+
+        <!-- Upload area for new image -->
         <div class="upload-area" id="uploadArea">
-          <input type="file" name="image" id="imageInput" accept="image/*" class="upload-input">
+          <input type="file" name="image_file" id="imageInput" accept="image/*" class="upload-input">
           <div class="upload-placeholder" id="uploadPlaceholder">
             <i class="fas fa-cloud-upload-alt"></i>
             <p>Click or drag to upload product image</p>
             <span>JPG, PNG, WebP (max 5MB)</span>
           </div>
-          <div class="upload-preview" id="uploadPreview" style="<%= product && product.image ? '' : 'display:none' %>">
-            <img src="<%= product && product.image ? product.image : '' %>" id="previewImg" alt="">
-            <button type="button" class="upload-remove" id="removeImage"><i class="fas fa-times"></i></button>
+          <div class="upload-preview" id="uploadPreview" style="display:none">
+            <img src="" id="previewImg" alt="Upload preview">
+            <button type="button" class="upload-cancel" id="cancelUpload"><i class="fas fa-times"></i></button>
           </div>
         </div>
+
+        <!-- Upload progress bar -->
+        <div id="uploadProgress" class="upload-progress" style="display:none">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text" id="progressText">Uploading... 0%</span>
+        </div>
+
+        <!-- Hidden input for the image URL -->
         <input type="hidden" name="image" id="imageUrl" value="<%= product ? product.image : '' %>">
       </div>
 
+      <!-- ======= GALLERY IMAGES (Multiple Images) ======= -->
       <div class="form-group">
-        <label>Additional Images (Gallery)</label>
-        <div class="gallery-upload" id="galleryUpload">
-          <input type="file" id="galleryInput" accept="image/*" multiple class="upload-input">
+        <label>Gallery Images (Additional Photos)</label>
+        <p class="field-hint">Upload multiple images for this product. Click the + button to add more.</p>
+        
+        <div class="gallery-section">
           <div class="gallery-grid" id="galleryGrid">
-            <% if (product) {
-              let images = [];
-              try { images = JSON.parse(product.images || '[]'); } catch(e) {}
-              images.forEach(img => { %>
-                <div class="gallery-item">
-                  <img src="<%= img %>" alt="">
-                  <button type="button" class="gallery-remove" data-url="<%= img %>"><i class="fas fa-times"></i></button>
-                </div>
-              <% });
-            } %>
+            <!-- Existing gallery images -->
+            <% 
+              let galleryImages = [];
+              if (product) {
+                try { galleryImages = JSON.parse(product.images || '[]'); } catch(e) {}
+              }
+              galleryImages.forEach((img, idx) => { 
+            %>
+              <div class="gallery-item" data-url="<%= img %>">
+                <img src="<%= img %>" alt="Gallery image <%= idx + 1 %>">
+                <button type="button" class="gallery-item-remove" title="Remove this image">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            <% }); %>
+            
+            <!-- Add button -->
             <div class="gallery-add" id="galleryAddBtn">
               <i class="fas fa-plus"></i>
               <span>Add Images</span>
             </div>
           </div>
-          <input type="hidden" name="images" id="imagesUrl" value="<%= product ? product.images || '[]' : '[]' %>">
+
+          <!-- Gallery upload progress container -->
+          <div id="galleryProgressContainer"></div>
+
+          <!-- Hidden input for multiple images JSON -->
+          <input type="hidden" name="images" id="imagesUrl" value="<%= product ? (product.images || '[]') : '[]' %>">
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary"><%= product ? 'Update Product' : 'Create Product' %></button>
+      <button type="submit" class="btn btn-primary btn-lg"><%= product ? 'Update Product' : 'Create Product' %></button>
     </form>
   </div>
 </div>
 
 <style>
+/* ===== Image Upload Styles ===== */
+.current-image-section {
+  margin-bottom: 15px;
+  padding: 16px;
+  background: var(--color-bg, #f9f5f0);
+  border-radius: var(--radius-md, 12px);
+  border: 2px solid var(--color-border, #e8ddd5);
+}
+.current-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.current-preview-img {
+  max-height: 180px;
+  border-radius: var(--radius-sm, 8px);
+  border: 3px solid var(--color-primary, #a63737);
+  box-shadow: 0 2px 10px rgba(166,55,55,0.15);
+}
+.current-image-label {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-text-light, #999);
+}
+.img-remove-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-error, #dc3545);
+  color: white;
+  border: 2px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.3);
+  transition: all 0.2s;
+}
+.img-remove-btn:hover {
+  transform: scale(1.1);
+  background: #c82333;
+}
 .upload-area {
   border: 2px dashed var(--color-border);
   border-radius: var(--radius-md);
@@ -127,43 +214,189 @@
   cursor: pointer;
   transition: all 0.3s;
   position: relative;
-  min-height: 200px;
+  min-height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--color-card-bg, #fff);
 }
-.upload-area:hover { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.upload-area:hover { 
+  border-color: var(--color-primary); 
+  background: var(--color-primary-bg, rgba(166,55,55,0.03)); 
+}
+.upload-area.dragover {
+  border-color: var(--color-primary);
+  background: rgba(166,55,55,0.08);
+  transform: scale(1.01);
+}
 .upload-input { display: none; }
 .upload-placeholder i { font-size: 48px; color: var(--color-text-light); margin-bottom: 12px; display: block; }
 .upload-placeholder p { font-weight: 500; color: var(--color-text); }
 .upload-placeholder span { font-size: 12px; color: var(--color-text-light); }
 .upload-preview { position: relative; display: inline-block; }
-.upload-preview img { max-height: 200px; border-radius: var(--radius-sm); }
-.upload-remove {
-  position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
-  border-radius: 50%; background: var(--color-error); color: white;
-  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+.upload-preview img { max-height: 180px; border-radius: var(--radius-sm); border: 3px solid #28a745; }
+.upload-cancel {
+  position: absolute; top: -10px; right: -10px; width: 28px; height: 28px;
+  border-radius: 50%; background: #6c757d; color: white;
+  border: 2px solid white; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; font-size: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-.gallery-upload { border: 2px dashed var(--color-border); border-radius: var(--radius-md); padding: 20px; }
-.gallery-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.upload-progress {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--color-bg, #f9f5f0);
+  border-radius: var(--radius-sm, 8px);
+}
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0d5cc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary, #a63737), var(--color-accent, #c4975a));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+.progress-text {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-light);
+  margin-top: 6px;
+}
+.field-hint {
+  font-size: 12px;
+  color: var(--color-text-light, #999);
+  margin: -8px 0 12px 0;
+}
+
+/* ===== Gallery Styles ===== */
+.gallery-section {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  padding: 20px;
+  background: var(--color-card-bg, #fff);
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
 .gallery-item {
-  position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
-  background: var(--color-bg);
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm, 8px);
+  overflow: hidden;
+  background: var(--color-bg, #f9f5f0);
+  border: 2px solid var(--color-border, #e8ddd5);
+  transition: border-color 0.2s;
 }
-.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-.gallery-remove {
-  position: absolute; top: 4px; right: 4px; width: 24px; height: 24px;
-  border-radius: 50%; background: rgba(0,0,0,0.5); color: white;
-  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px;
+.gallery-item:hover {
+  border-color: var(--color-primary, #a63737);
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.gallery-item-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(220,53,69,0.85);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transition: all 0.2s;
+}
+.gallery-item:hover .gallery-item-remove {
+  opacity: 1;
+}
+.gallery-item-remove:hover {
+  transform: scale(1.15);
+  background: #dc3545;
+}
+.gallery-item.uploading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.gallery-item.uploading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  animation: uploadProgress 2s ease-in-out infinite;
+}
+@keyframes uploadProgress {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
 }
 .gallery-add {
-  aspect-ratio: 1; border: 2px dashed var(--color-border); border-radius: var(--radius-sm);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--color-text-light); transition: all 0.3s;
+  aspect-ratio: 1;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-sm, 8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-light);
+  transition: all 0.3s;
+  background: var(--color-bg, #f9f5f0);
 }
-.gallery-add:hover { border-color: var(--color-primary); color: var(--color-primary); }
-.gallery-add i { font-size: 24px; }
+.gallery-add:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(166,55,55,0.05);
+  transform: scale(1.02);
+}
+.gallery-add i { font-size: 28px; }
 .gallery-add span { font-size: 11px; margin-top: 4px; }
+.gallery-progress-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: var(--color-bg, #f9f5f0);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 13px;
+}
+.gallery-progress-item .mini-bar {
+  flex: 1;
+  height: 6px;
+  background: #e0d5cc;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.gallery-progress-item .mini-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.gallery-progress-item .gallery-progress-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-light);
+  font-size: 11px;
+}
 </style>
 
 <script>
@@ -174,97 +407,307 @@ document.addEventListener('DOMContentLoaded', function() {
   const previewImg = document.getElementById('previewImg');
   const uploadPlaceholder = document.getElementById('uploadPlaceholder');
   const imageUrlInput = document.getElementById('imageUrl');
+  const uploadProgress = document.getElementById('uploadProgress');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const currentImageSection = document.getElementById('currentImageSection');
+  const removeCurrentBtn = document.getElementById('removeCurrentImage');
+  const cancelUploadBtn = document.getElementById('cancelUpload');
 
+  // ——— MAIN IMAGE UPLOAD ———
   if (uploadArea && imageInput) {
-    uploadArea.addEventListener('click', () => imageInput.click());
-    imageInput.addEventListener('change', async function(e) {
+    // Click to upload
+    uploadArea.addEventListener('click', (e) => {
+      if (e.target.closest('.upload-cancel, .img-remove-btn')) return;
+      imageInput.click();
+    });
+
+    // Drag & drop
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        imageInput.files = e.dataTransfer.files;
+        imageInput.dispatchEvent(new Event('change'));
+      }
+    });
+
+    // File selected - upload with progress
+    imageInput.addEventListener('change', function(e) {
       const file = this.files[0];
       if (!file) return;
-      
+
+      // Cancel any ongoing upload by resetting the form
       // Show preview immediately
       const reader = new FileReader();
       reader.onload = function(e2) {
         previewImg.src = e2.target.result;
         uploadPreview.style.display = 'inline-block';
         uploadPlaceholder.style.display = 'none';
+        if (currentImageSection) currentImageSection.style.display = 'none';
       };
       reader.readAsDataURL(file);
-      
-      // Upload to server
+
+      // Upload with XMLHttpRequest for progress tracking
+      uploadProgress.style.display = 'block';
+      progressFill.style.width = '0%';
+      progressText.textContent = 'Uploading... 0%';
+
       const formData = new FormData();
       formData.append('image', file);
-      
-      try {
-        const res = await fetch('/upload/single', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
-          imageUrlInput.value = data.url;
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload/gallery', true);
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          progressFill.style.width = pct + '%';
+          progressText.textContent = 'Uploading... ' + pct + '%';
         }
-      } catch(err) {
-        console.error('Upload error:', err);
+      };
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.success) {
+              progressFill.style.width = '100%';
+              progressText.textContent = '✅ Upload complete!';
+              imageUrlInput.value = data.url;
+
+              // After completion, show the uploaded image as current
+              previewImg.src = data.url;
+
+              setTimeout(() => {
+                uploadProgress.style.display = 'none';
+              }, 1500);
+            } else {
+              progressText.textContent = '❌ Upload failed: ' + (data.message || 'Unknown error');
+            }
+          } catch(e) {
+            progressText.textContent = '❌ Upload failed';
+          }
+        } else {
+          progressText.textContent = '❌ Upload failed (HTTP ' + xhr.status + ')';
+        }
+      };
+
+      xhr.onerror = function() {
+        progressText.textContent = '❌ Network error';
+      };
+
+      xhr.send(formData);
+    });
+  }
+
+  // ——— CANCEL UPLOAD ———
+  if (cancelUploadBtn) {
+    cancelUploadBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      uploadPreview.style.display = 'none';
+      uploadPlaceholder.style.display = 'block';
+      imageUrlInput.value = '';
+      imageInput.value = '';
+      previewImg.src = '';
+      uploadProgress.style.display = 'none';
+      if (currentImageSection && document.getElementById('currentMainImage').src) {
+        currentImageSection.style.display = 'block';
       }
     });
   }
 
-  document.getElementById('removeImage')?.addEventListener('click', function(e) {
-    e.stopPropagation();
-    uploadPreview.style.display = 'none';
-    uploadPlaceholder.style.display = 'block';
-    imageUrlInput.value = '';
-    imageInput.value = '';
-    previewImg.src = '';
-  });
+  // ——— REMOVE CURRENT IMAGE ———
+  if (removeCurrentBtn) {
+    removeCurrentBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!confirm('Remove the current main image? This will delete it from storage.')) return;
 
-  // Gallery upload
-  const galleryInput = document.getElementById('galleryInput');
+      const currentUrl = imageUrlInput.value;
+      
+      // Delete from server
+      fetch('/upload/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: currentUrl })
+      }).catch(() => {});
+
+      // Clear UI
+      currentImageSection.style.display = 'none';
+      imageUrlInput.value = '';
+      imageInput.value = '';
+      
+      // Show upload area
+      uploadPreview.style.display = 'none';
+      uploadPlaceholder.style.display = 'block';
+    });
+  }
+
+  // ——— GALLERY IMAGES (MULTIPLE) ———
+  const galleryInput = document.createElement('input');
+  galleryInput.type = 'file';
+  galleryInput.accept = 'image/*';
+  galleryInput.multiple = true;
+  galleryInput.style.display = 'none';
+  document.querySelector('.gallery-section').appendChild(galleryInput);
+
   const galleryAddBtn = document.getElementById('galleryAddBtn');
   const galleryGrid = document.getElementById('galleryGrid');
   const imagesUrlInput = document.getElementById('imagesUrl');
+  const progressContainer = document.getElementById('galleryProgressContainer');
 
-  if (galleryAddBtn && galleryInput) {
+  if (galleryAddBtn) {
     galleryAddBtn.addEventListener('click', () => galleryInput.click());
-    galleryInput.addEventListener('change', async function(e) {
-      const files = Array.from(this.files);
-      if (files.length === 0) return;
-      
-      const formData = new FormData();
-      files.forEach(f => formData.append('images', f));
-      
-      try {
-        const res = await fetch('/upload/multiple', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
-          let currentImages = [];
-          try { currentImages = JSON.parse(imagesUrlInput.value || '[]'); } catch(e) {}
-          
-          data.urls.forEach(url => {
-            currentImages.push(url);
-            const div = document.createElement('div');
-            div.className = 'gallery-item';
-            div.innerHTML = '<img src="'+url+'" alt=""><button type="button" class="gallery-remove" data-url="'+url+'"><i class="fas fa-times"></i></button>';
-            galleryGrid.insertBefore(div, galleryAddBtn);
-          });
-          
-          imagesUrlInput.value = JSON.stringify(currentImages);
-        }
-      } catch(err) {
-        console.error('Gallery upload error:', err);
-      }
-    });
   }
 
-  // Remove gallery images
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.gallery-remove');
+  galleryInput.addEventListener('change', async function(e) {
+    const files = Array.from(this.files);
+    if (files.length === 0) return;
+
+    let currentImages = [];
+    try { currentImages = JSON.parse(imagesUrlInput.value || '[]'); } catch(e) {}
+
+    // Process each file one by one
+    for (const file of files) {
+      // Show uploading indicator
+      const uploadingItem = document.createElement('div');
+      uploadingItem.className = 'gallery-item uploading';
+      uploadingItem.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--color-text-light);font-size:12px;">Uploading...</div>';
+      galleryGrid.insertBefore(uploadingItem, galleryAddBtn);
+
+      // Progress bar for this file
+      const progressItem = document.createElement('div');
+      progressItem.className = 'gallery-progress-item';
+      progressItem.innerHTML = '<span class="gallery-progress-name">' + file.name.substring(0, 25) + '</span><div class="mini-bar"><div class="mini-fill" style="width:0%"></div></div><span class="gallery-progress-pct">0%</span>';
+      progressContainer.appendChild(progressItem);
+      const miniFill = progressItem.querySelector('.mini-fill');
+      const pctSpan = progressItem.querySelector('.gallery-progress-pct');
+
+      // Upload via XHR with progress
+      try {
+        const url = await uploadWithProgress(file, (pct) => {
+          miniFill.style.width = pct + '%';
+          pctSpan.textContent = pct + '%';
+        });
+
+        if (url) {
+          // Remove uploading indicator
+          uploadingItem.remove();
+
+          // Add to gallery
+          currentImages.push(url);
+          const item = document.createElement('div');
+          item.className = 'gallery-item';
+          item.dataset.url = url;
+          item.innerHTML = '<img src="' + url + '" alt="Gallery image"><button type="button" class="gallery-item-remove"><i class="fas fa-times"></i></button>';
+          galleryGrid.insertBefore(item, galleryAddBtn);
+
+          // Mark progress as done
+          progressItem.querySelector('.gallery-progress-name').textContent = '✅ ' + file.name.substring(0, 22);
+          miniFill.style.width = '100%';
+          miniFill.style.background = '#28a745';
+          pctSpan.textContent = 'Done';
+        } else {
+          uploadingItem.remove();
+          progressItem.querySelector('.gallery-progress-name').textContent = '❌ ' + file.name.substring(0, 22);
+          miniFill.style.background = '#dc3545';
+          pctSpan.textContent = 'Failed';
+        }
+      } catch(err) {
+        uploadingItem.remove();
+        progressItem.querySelector('.gallery-progress-name').textContent = '❌ ' + file.name.substring(0, 22);
+        miniFill.style.background = '#dc3545';
+        pctSpan.textContent = 'Error';
+      }
+    }
+
+    // Update hidden input
+    imagesUrlInput.value = JSON.stringify(currentImages);
+
+    // Clear input so the same file can be re-selected
+    galleryInput.value = '';
+
+    // Remove progress indicators after 3 seconds
+    setTimeout(() => {
+      const items = progressContainer.querySelectorAll('.gallery-progress-item');
+      items.forEach(item => {
+        if (item.textContent.includes('✅') || item.textContent.includes('❌')) {
+          setTimeout(() => item.remove(), 2000);
+        }
+      });
+    }, 3000);
+  });
+
+  // ——— REMOVE GALLERY IMAGE ———
+  galleryGrid.addEventListener('click', function(e) {
+    const btn = e.target.closest('.gallery-item-remove');
     if (!btn) return;
-    
-    const url = btn.dataset.url;
-    btn.closest('.gallery-item').remove();
-    
+
+    const item = btn.closest('.gallery-item');
+    const url = item.dataset.url;
+    if (!url) return;
+
+    if (!confirm('Remove this image?')) return;
+
+    // Delete from server
+    fetch('/upload/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    }).catch(() => {});
+
+    // Remove from gallery
+    item.remove();
+
+    // Update hidden input
     let currentImages = [];
     try { currentImages = JSON.parse(imagesUrlInput.value || '[]'); } catch(e) {}
     currentImages = currentImages.filter(i => i !== url);
     imagesUrlInput.value = JSON.stringify(currentImages);
   });
+
+  // ——— HELPER: Upload with XHR progress ———
+  function uploadWithProgress(file, onProgress) {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload/gallery', true);
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable && onProgress) {
+          onProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.success) {
+              resolve(data.url);
+            } else {
+              resolve(null);
+            }
+          } catch(e) {
+            resolve(null);
+          }
+        } else {
+          resolve(null);
+        }
+      };
+
+      xhr.onerror = () => resolve(null);
+      xhr.send(formData);
+    });
+  }
 });
 </script>
