@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Auto-switch to PostgreSQL when env is set
-if (process.env.SUPABASE_DB_URL) {
+if (process.env.SUPABASE_DB_URL || process.env.PGHOST) {
   module.exports = require('./database-pg');
 } else {
 
