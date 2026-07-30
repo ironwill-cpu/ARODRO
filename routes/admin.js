@@ -168,7 +168,7 @@ router.get('/products/edit/:id', async (req, res) => {
 
 router.post('/products/edit/:id', async (req, res) => {
   try {
-    // Auto-generate slug if not provided
+    // Auto-generate slug if not provided or empty
     if (!req.body.slug || !req.body.slug.trim()) {
       req.body.slug = req.body.name.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
@@ -178,9 +178,14 @@ router.post('/products/edit/:id', async (req, res) => {
     if (req.body.image === '') {
       req.body.image = null;
     }
+    // Handle images gallery: if empty, explicit null
+    if (req.body.images === '[]' || req.body.images === '') {
+      req.body.images = null;
+    }
     await db.updateProduct(req.params.id, req.body);
     res.redirect('/admin/products');
   } catch (err) {
+    console.error('Product update error:', err.message);
     const [product, categories] = await Promise.all([
       db.getProductById(req.params.id),
       db.getCategories()

@@ -126,11 +126,20 @@ async function createProduct(data) {
 }
 
 async function updateProduct(id, data) {
-  const fields = ['name','slug','short_description','description','price','category_id','image','images','stock','featured','active'];
-  const sets = fields.filter(f => data[f] !== undefined).map((f, i) => `${f} = $${i + 2}`);
-  if (sets.length === 0) return;
-  const vals = fields.filter(f => data[f] !== undefined).map(f => data[f]);
-  await query(`UPDATE products SET ${sets.join(', ')} WHERE id = $1`, [id, ...vals]);
+  // Only include fields that are actually provided AND in our allowed list
+  const allowed = ['name','slug','short_description','description','price','category_id','image','images','stock','featured','active'];
+  const presentFields = allowed.filter(f => data[f] !== undefined);
+  if (presentFields.length === 0) {
+    console.log('updateProduct: no fields to update');
+    return;
+  }
+  // Build SET clause with numbered params (starting at $2)
+  const setClauses = presentFields.map((f, i) => `${f} = $${i + 2}`);
+  const values = presentFields.map(f => data[f]);
+  const sql = `UPDATE products SET ${setClauses.join(', ')} WHERE id = $1`;
+  console.log('updateProduct SQL:', sql);
+  console.log('updateProduct params:', [id, ...values.map(v => typeof v === 'string' ? v.substring(0,50) : v)]);
+  await query(sql, [id, ...values]);
 }
 
 async function deleteProduct(id) {
