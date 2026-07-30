@@ -9,8 +9,8 @@ function getPool() {
     const url = process.env.SUPABASE_DB_URL;
     const pgConfig = url ? { connectionString: url, ssl: { rejectUnauthorized: false } } 
       : {
-          host: process.env.PGHOST || 'aws-0-ap-southeast-1.pooler.supabase.com',
-          port: parseInt(process.env.PGPORT || '6543'),
+          host: 'aws-0-ap-southeast-1.pooler.supabase.com',
+          port: 6543,
           database: process.env.PGDATABASE || 'postgres',
           user: process.env.PGUSER || 'postgres.hzdvwkkjhikneqmgtedm',
           password: process.env.PGPASSWORD || 'Artcell@24@',
