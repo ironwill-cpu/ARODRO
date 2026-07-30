@@ -73,9 +73,7 @@ app.use((err, req, res, next) => {
   res.status(500).render('500', { 
     title: 'Server Error — ARODRO',
     categories: [],
-    cartCount: 0,
-    errorMessage: err.message,
-    errorStack: err.stack
+    cartCount: 0 
   });
 });
 
