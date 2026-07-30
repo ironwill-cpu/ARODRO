@@ -26,13 +26,32 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   
-  const d = await db.getDb();
-  const stmt = d.prepare('SELECT * FROM admin_users WHERE username = ?');
-  stmt.bind([username]);
+  // Support both SQLite and PostgreSQL
+  let user = null;
+  try {
+    // Try PostgreSQL style first
+    const r = await db.query ? db.query('SELECT * FROM admin_users WHERE username = $1', [username]) : null;
+    user = r && r.rows ? r.rows[0] : null;
+  } catch (e) {
+    // Fall through to SQLite style
+  }
   
-  if (stmt.step()) {
-    const user = stmt.getAsObject();
-    stmt.free();
+  if (!user) {
+    try {
+      // Try SQLite style
+      const d = await db.getDb();
+      const stmt = d.prepare('SELECT * FROM admin_users WHERE username = ?');
+      stmt.bind([username]);
+      if (stmt.step()) {
+        user = stmt.getAsObject();
+      }
+      stmt.free();
+    } catch (e2) {
+      console.error('Login query failed:', e2.message);
+    }
+  }
+  
+  if (user) {
     
     if (bcrypt.compareSync(password, user.password)) {
       req.session.admin = { id: user.id, username: user.username };
