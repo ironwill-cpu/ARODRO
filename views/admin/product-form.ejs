@@ -9,7 +9,7 @@
   <% } %>
 
   <div class="admin-card">
-    <form method="POST" action="<%= product ? '/admin/products/edit/' + product.id : '/admin/products/new' %>" enctype="multipart/form-data">
+    <form method="POST" action="<%= product ? '/admin/products/edit/' + product.id : '/admin/products/new' %>">
       <div class="form-grid">
         <div class="form-group">
           <label>Product Name *</label>

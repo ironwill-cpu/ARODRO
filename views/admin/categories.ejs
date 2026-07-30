@@ -34,7 +34,7 @@
             <% categories.forEach(cat => { %>
               <tr>
                 <td><strong><%= cat.name %></strong></td>
-                <td><%= cat.product_count || 0 %></td>
+                <td><%= typeof cat.product_count !== 'undefined' ? cat.product_count : 0 %></td>
                 <td class="actions-cell">
                   <form action="/admin/categories/delete/<%= cat.id %>" method="POST" style="display:inline" onsubmit="return confirm('Delete this category? Products in this category will be uncategorized.')">
                     <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>

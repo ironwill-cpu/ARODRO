@@ -207,7 +207,12 @@ router.post('/products/delete/:id', async (req, res) => {
 
 // Categories management
 router.get('/categories', async (req, res) => {
-  const categories = await db.getCategories();
+  let categories;
+  try {
+    categories = await db.getCategoriesWithProductCount();
+  } catch(e) {
+    categories = await db.getCategories();
+  }
   res.render('admin/categories', { 
     title: 'Categories — ARODRO Admin',
     categories, cartCount: 0,
@@ -217,9 +222,16 @@ router.get('/categories', async (req, res) => {
 
 router.post('/categories/create', async (req, res) => {
   try {
+    // Auto-generate slug if not provided
+    if (!req.body.slug || !req.body.slug.trim()) {
+      req.body.slug = req.body.name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'category-' + Date.now();
+    }
     await db.createCategory(req.body);
     res.redirect('/admin/categories');
   } catch (err) {
+    console.error('Category create error:', err.message);
     res.redirect('/admin/categories');
   }
 });
@@ -238,6 +250,18 @@ router.post('/categories/delete/:id', async (req, res) => {
     await db.deleteCategory(req.params.id);
     res.redirect('/admin/categories');
   } catch (err) {
+    console.error('Category delete error:', err.message);
+    // Check if foreign key constraint prevents deletion
+    if (err.message && err.message.includes('foreign key')) {
+      // Products refer to this category - set them to null first
+      try {
+        await db.query('UPDATE products SET category_id = NULL WHERE category_id = $1', [req.params.id]);
+        await db.deleteCategory(req.params.id);
+        return res.redirect('/admin/categories');
+      } catch(e2) {
+        console.error('Force delete failed:', e2.message);
+      }
+    }
     res.redirect('/admin/categories');
   }
 });
