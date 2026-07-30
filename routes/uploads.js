@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
+const supabaseStorage = require('../storage');
 
 console.log('✓ Upload route module loaded');
 
@@ -46,13 +47,27 @@ router.get('/test', (req, res) => {
 });
 
 // Single image upload
-router.post('/single', upload.single('image'), (req, res) => {
+router.post('/single', upload.single('image'), async (req, res) => {
   console.log('Upload /single called, file:', req.file ? req.file.filename : 'none');
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'No file uploaded' });
   }
-  const url = '/uploads/products/' + req.file.filename;
-  res.json({ success: true, url, filename: req.file.filename });
+  const localPath = req.file.path;
+  const filename = req.file.filename;
+  
+  // Try uploading to Supabase Storage
+  try {
+    const result = await supabaseStorage.uploadImage(localPath, filename);
+    if (!result.local) {
+      // Successfully uploaded to cloud
+      return res.json({ success: true, url: result.url, filename, cloud: true });
+    }
+  } catch (e) {
+    console.log('Supabase upload failed, using local:', e.message);
+  }
+  
+  // Fallback to local
+  res.json({ success: true, url: '/uploads/products/' + filename, filename });
 });
 
 // Multiple images upload

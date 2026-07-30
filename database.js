@@ -2,6 +2,11 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
+// Auto-switch to PostgreSQL when env is set
+if (process.env.SUPABASE_DB_URL) {
+  module.exports = require('./database-pg');
+} else {
+
 const DB_PATH = path.join(__dirname, 'arodro.db');
 
 let db = null;
@@ -687,4 +692,5 @@ async function updateSetting(key, value) {
   d.run("INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)", [key, value]);
   saveDb();
   return true;
+}
 }

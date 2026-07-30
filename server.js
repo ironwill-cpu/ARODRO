@@ -4,6 +4,8 @@ const session = require('express-session');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const db = require('./database');
+const storage = require('./storage');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -79,6 +81,7 @@ app.use((err, req, res, next) => {
 async function start() {
   try {
     await db.initDb();
+  await storage.ensureBucket();
     console.log('✓ Database ready');
     
     app.listen(PORT, '0.0.0.0', () => {

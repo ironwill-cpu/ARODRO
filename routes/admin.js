@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
+const storage = require('../storage');
 const bcrypt = require('bcryptjs');
 
 // Auth middleware
@@ -300,29 +301,37 @@ const fs = require('fs');
 const path = require('path');
 const setStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '..', 'public', 'uploads', 'settings');
+    const dir = path.join(__dirname, '../public/uploads/settings');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${req.body.setting_key || 'image'}${ext}`);
+    const ext = path.extname(file.originalname);
+    cb(null, 'setting_' + Date.now() + ext);
   }
 });
-const setUpload = multer({ storage: setStorage, limits: { fileSize: 2*1024*1024 } });
+const uploadSetting = multer({ storage: setStorage, limits: { fileSize: 2 * 1024 * 1024 } });
 
-router.post('/settings/upload-image', (req, res, next) => {
+router.post('/settings/upload-image', uploadSetting.single('image'), async (req, res) => {
   if (!req.session.admin) return res.status(401).json({ success: false });
-  next();
-}, setUpload.single('image'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ success: false, message: 'No file' });
+  
+  const key = req.body.key || 'hero_image';
+  const filePath = req.file.path;
+  
+  // Try Supabase Storage first
   try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file' });
-    const url = `/uploads/settings/${req.file.filename}`;
-    await db.updateSetting(req.body.setting_key, url);
-    res.json({ success: true, url });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    const url = await storage.uploadSettingsImage(key, filePath);
+    await db.updateSetting(key, url);
+    return res.json({ success: true, url });
+  } catch (e) {
+    console.log('Storage upload failed, using local:', e.message);
   }
+  
+  // Local fallback
+  const localUrl = '/uploads/settings/' + req.file.filename;
+  await db.updateSetting(key, localUrl);
+  res.json({ success: true, url: localUrl });
 });
 
 module.exports = router;
