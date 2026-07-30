@@ -52,13 +52,10 @@ router.post('/login', async (req, res) => {
   }
   
   if (user) {
-    
     if (bcrypt.compareSync(password, user.password)) {
       req.session.admin = { id: user.id, username: user.username };
       return res.redirect('/admin');
     }
-  } else {
-    stmt.free();
   }
   
   res.render('admin/login', { 
