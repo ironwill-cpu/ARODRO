@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: arodro
+    runtime: node
+    repo: https://github.com/ironwill-cpu/ARODRO
+    plan: free
+    env:
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: NODE_VERSION
+        value: 18
+    region: singapore
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    domains:
+      - arodro.onrender.com
