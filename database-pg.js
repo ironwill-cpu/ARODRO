@@ -119,15 +119,15 @@ async function getProductById(id) {
 
 async function createProduct(data) {
   const r = await query(
-    'INSERT INTO products (name, slug, short_description, description, price, category_id, image, images, stock, featured, active) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id',
-    [data.name, data.slug, data.short_description, data.description, data.price, data.category_id, data.image, data.images, data.stock || 10, data.featured || 0, data.active || 1]
+    'INSERT INTO products (name, slug, short_description, description, price, compare_price, category_id, image, images, stock, featured, active, ingredients, weight) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id',
+    [data.name, data.slug, data.short_description, data.description, data.price, data.compare_price || null, data.category_id, data.image, data.images, data.stock || 10, data.featured || 0, data.active || 1, data.ingredients || null, data.weight || null]
   );
   return r.rows[0].id;
 }
 
 async function updateProduct(id, data) {
   // Only include fields that are actually provided AND in our allowed list
-  const allowed = ['name','slug','short_description','description','price','category_id','image','images','stock','featured','active'];
+  const allowed = ['name','slug','short_description','description','price','compare_price','category_id','image','images','stock','featured','active','ingredients','weight'];
   const presentFields = allowed.filter(f => data[f] !== undefined);
   if (presentFields.length === 0) {
     console.log('updateProduct: no fields to update');
