@@ -3,22 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof title !== 'undefined' ? title : 'ARODRO' %></title>
+  <title><%= typeof title !== 'undefined' ? title : (site.site_name || 'ARODRO') %></title>
+  <% if (site && site.favicon_url) { %>
+    <link rel="icon" type="image/x-icon" href="<%= site.favicon_url %>">
+  <% } %>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
+  
+  <!-- Dynamic site colors -->
+  <style>
+    :root {
+      --color-primary: <%= site.color_primary || '#a63737' %>;
+      --color-primary-dark: <%= site.color_primary_dark || '#8a2e2e' %>;
+      --color-gold: <%= site.color_gold || '#c4975a' %>;
+      --color-gold-light: <%= site.color_gold_light || '#d4a853' %>;
+      --color-bg: <%= site.color_bg || '#fdf8f5' %>;
+      --color-text: <%= site.color_text || '#2d1b1b' %>;
+      --color-text-light: <%= site.color_text_light || '#7c6b6b' %>;
+      --color-white: <%= site.color_white || '#ffffff' %>;
+      --color-dark: <%= site.color_dark || '#1a0f0f' %>;
+      --color-border: <%= site.color_border || '#e8d5c9' %>;
+      --color-success: <%= site.color_success || '#2e7d32' %>;
+      --color-error: <%= site.color_error || '#c62828' %>;
+    }
+  </style>
 </head>
 <body>
   <!-- Announcement Bar -->
-  <div class="announcement-bar">
+  <% if (!site.announcement_enabled || site.announcement_enabled === 'true') { %>
+  <div class="announcement-bar" style="background:<%= site.announcement_bg || '#1a0f0f' %>;color:<%= site.announcement_text_color || '#c4975a' %>;">
     <div class="container">
-      <span>✨ Free Shipping on orders over ৳1,500</span>
-      <span class="announcement-divider">|</span>
-      <span>🇧🇩 Premium Cosmetics in Bangladesh</span>
+      <span><%= site.announcement_text || '✨ Free Shipping on orders over ৳1,500' %></span>
     </div>
   </div>
+  <% } %>
 
   <!-- Header -->
   <header class="header">
@@ -29,7 +50,7 @@
         </button>
 
         <a href="/" class="logo">
-          <span class="logo-text">ARODRO</span>
+          <span class="logo-text"><%= site.logo_text || site.site_name || 'ARODRO' %></span>
           <span class="logo-tagline">Cosmetics</span>
         </a>
 
@@ -94,13 +115,13 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <h3 class="footer-logo">ARODRO</h3>
-          <p class="footer-desc">Premium cosmetics crafted for the modern beauty enthusiast. ARODRO brings you luxury skincare, makeup, haircare, and fragrances.</p>
+          <h3 class="footer-logo"><%= site.site_name || 'ARODRO' %></h3>
+          <p class="footer-desc"><%= site.site_description || 'Premium cosmetics crafted for the modern beauty enthusiast.' %></p>
           <div class="social-links">
-            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+            <a href="<%= site.social_facebook || '#' %>" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="<%= site.social_instagram || '#' %>" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="<%= site.social_youtube || '#' %>" class="social-link"><i class="fab fa-youtube"></i></a>
+            <a href="<%= site.social_twitter || '#' %>" class="social-link"><i class="fab fa-twitter"></i></a>
           </div>
         </div>
 
@@ -125,9 +146,9 @@
         <div class="footer-col">
           <h4 class="footer-heading">Contact</h4>
           <div class="contact-info">
-            <p><i class="fas fa-phone"></i> +880 1XXX-XXXXXX</p>
-            <p><i class="fas fa-envelope"></i> hello@arodro.com</p>
-            <p><i class="fas fa-map-marker-alt"></i> Dhaka, Bangladesh</p>
+            <p><i class="fas fa-phone"></i> <%= site.footer_phone || '+880 1XXX-XXXXXX' %></p>
+            <p><i class="fas fa-envelope"></i> <%= site.footer_email || 'hello@arodro.com' %></p>
+            <p><i class="fas fa-map-marker-alt"></i> <%= site.footer_address || 'Dhaka, Bangladesh' %></p>
           </div>
           <div class="payment-icons">
             <i class="fab fa-cc-visa"></i>
@@ -138,7 +159,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; <%= new Date().getFullYear() %> ARODRO Cosmetics. All rights reserved.</p>
+        <p><%= site.footer_text || '© ' + new Date().getFullYear() + ' ARODRO Cosmetics. All rights reserved.' %></p>
       </div>
     </div>
   </footer>

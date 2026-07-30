@@ -133,6 +133,45 @@ async function initDb() {
     )
   `);
 
+  // Coupons table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS coupons (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      type TEXT NOT NULL DEFAULT 'percentage',
+      value REAL NOT NULL,
+      min_order REAL DEFAULT 0,
+      max_uses INTEGER DEFAULT 100,
+      uses INTEGER DEFAULT 0,
+      active INTEGER DEFAULT 1,
+      expires_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Product variants table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS product_variants (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      value TEXT NOT NULL,
+      price_adjust REAL DEFAULT 0,
+      stock INTEGER DEFAULT 10,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Site settings table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS site_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      type TEXT DEFAULT 'text',
+      group_name TEXT DEFAULT 'general'
+    )
+  `);
+
   // Create admin user if not exists
   const bcrypt = require('bcryptjs');
   const adminUser = db.exec("SELECT id FROM admin_users WHERE username = 'admin'");
@@ -544,6 +583,11 @@ module.exports = {
   addVariant,
   deleteVariant,
   updateVariantStock,
+  
+  // Settings functions
+  getAllSettings,
+  getSetting,
+  updateSetting,
   saveDb
 };
 
@@ -616,4 +660,31 @@ async function updateVariantStock(id, stock) {
   const d = await getDb();
   d.run("UPDATE product_variants SET stock = ? WHERE id = ?", [stock, id]);
   saveDb();
+}
+
+// Settings functions
+async function getAllSettings() {
+  const d = await getDb();
+  const stmt = d.prepare("SELECT * FROM site_settings ORDER BY group_name, key");
+  const rows = [];
+  while (stmt.step()) rows.push(stmt.getAsObject());
+  stmt.free();
+  return rows;
+}
+
+async function getSetting(key) {
+  const d = await getDb();
+  const stmt = d.prepare("SELECT value FROM site_settings WHERE key = ?");
+  stmt.bind([key]);
+  let val = null;
+  if (stmt.step()) val = stmt.getAsObject().value;
+  stmt.free();
+  return val;
+}
+
+async function updateSetting(key, value) {
+  const d = await getDb();
+  d.run("INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)", [key, value]);
+  saveDb();
+  return true;
 }

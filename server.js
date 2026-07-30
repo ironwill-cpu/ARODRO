@@ -29,9 +29,17 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layout');
 
-// Make cart count available in all views
+// Make cart count + site settings available in all views
 app.use(async (req, res, next) => {
   res.locals.cartCount = req.session.cart ? req.session.cart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  try {
+    const settings = await db.getAllSettings();
+    const site = {};
+    settings.forEach(s => { site[s.key] = s.value; });
+    res.locals.site = site;
+  } catch (e) {
+    res.locals.site = {};
+  }
   next();
 });
 

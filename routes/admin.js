@@ -258,4 +258,71 @@ router.delete('/coupons/delete/:id', async (req, res) => {
   res.json({ success: true });
 });
 
+// Admin: Settings
+router.get('/settings', async (req, res) => {
+  if (!req.session.admin) return res.redirect('/admin/login');
+  const settings = await db.getAllSettings();
+  const categories = await db.getCategories();
+  
+  const groups = {};
+  settings.forEach(s => {
+    if (!groups[s.group_name]) groups[s.group_name] = [];
+    groups[s.group_name].push(s);
+  });
+  
+  res.render('admin/settings', {
+    title: 'Settings — ARODRO Admin',
+    groups, settings,
+    categories,
+    cartCount: 0,
+    admin: req.session.admin,
+    message: req.query.saved ? '✅ Settings saved! Restart server for color changes.' : null
+  });
+});
+
+// Batch update settings
+router.post('/settings/update', async (req, res) => {
+  if (!req.session.admin) return res.status(401).json({ success: false });
+  try {
+    const entries = Object.entries(req.body).filter(([k]) => k.startsWith('setting_'));
+    for (const [key, value] of entries) {
+      await db.updateSetting(key.replace('setting_', ''), value);
+    }
+    res.redirect('/admin/settings?saved=1');
+  } catch (err) {
+    res.status(500).send('Error: ' + err.message);
+  }
+});
+
+// Upload setting image (multer inline)
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const setStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, '..', 'public', 'uploads', 'settings');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${req.body.setting_key || 'image'}${ext}`);
+  }
+});
+const setUpload = multer({ storage: setStorage, limits: { fileSize: 2*1024*1024 } });
+
+router.post('/settings/upload-image', (req, res, next) => {
+  if (!req.session.admin) return res.status(401).json({ success: false });
+  next();
+}, setUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file' });
+    const url = `/uploads/settings/${req.file.filename}`;
+    await db.updateSetting(req.body.setting_key, url);
+    res.json({ success: true, url });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;
