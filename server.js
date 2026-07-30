@@ -81,9 +81,14 @@ app.use((err, req, res, next) => {
 async function start() {
   try {
     await db.initDb();
-  await storage.ensureBucket();
+    await storage.ensureBucket();
     console.log('✓ Database ready');
-    
+  } catch (err) {
+    console.error('⚠ Database init failed:', err.message);
+    console.log('⚠ Server will start with limited functionality');
+  }
+  
+  try {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n✨ ARODRO Cosmetics E-Commerce Platform`);
       console.log(`   ───────────────────────────────────`);
