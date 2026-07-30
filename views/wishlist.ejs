@@ -1,0 +1,73 @@
+<!-- Page Header -->
+<section class="page-header page-header-sm">
+  <div class="container">
+    <h1 class="page-title">My Wishlist 💝</h1>
+    <p class="page-subtitle"><%= items.length %> saved <%= items.length === 1 ? 'item' : 'items' %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <% if (items.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-icon"><i class="far fa-heart"></i></div>
+        <h2>Your wishlist is empty</h2>
+        <p>Save your favorite products and come back to them later.</p>
+        <a href="/" class="btn btn-primary">Discover Products</a>
+      </div>
+    <% } else { %>
+      <div class="products-grid">
+        <% items.forEach(product => { %>
+          <div class="product-card" data-id="<%= product.id %>">
+            <div class="product-image">
+              <div class="product-placeholder" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
+                <% if (product.image && product.image.startsWith('/')) { %>
+                  <img src="<%= product.image %>" alt="<%= product.name %>" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
+                <% } else { %>
+                  <i class="fas fa-gem"></i>
+                <% } %>
+              </div>
+              <button class="wishlist-btn active" data-id="<%= product.id %>" onclick="toggleWishlist(this, <%= product.id %>)">
+                <i class="fas fa-heart"></i>
+              </button>
+              <% if (product.compare_price) { %>
+                <span class="product-badge sale">Sale</span>
+              <% } %>
+            </div>
+            <div class="product-info">
+              <span class="product-category"><%= product.category_name || 'Cosmetics' %></span>
+              <a href="/products/<%= product.slug %>" class="product-name-link">
+                <h3 class="product-name"><%= product.name %></h3>
+              </a>
+              <div class="product-price">
+                <span class="price-current">৳<%= Number(product.price).toFixed(0) %></span>
+                <% if (product.compare_price) { %>
+                  <span class="price-compare">৳<%= Number(product.compare_price).toFixed(0) %></span>
+                <% } %>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(<%= product.id %>, '<%= product.name.replace(/'/g, "\\'") %>', <%= product.price %>, '<%= product.image || '' %>')">
+                <i class="fas fa-shopping-bag"></i> Add to Cart
+              </button>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<style>
+.empty-state { text-align: center; padding: 80px 20px; }
+.empty-icon { font-size: 80px; color: var(--color-primary-light); margin-bottom: 16px; }
+.empty-state h2 { font-family: var(--font-heading); margin-bottom: 8px; }
+.empty-state p { color: var(--color-text-light); margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto; }
+.wishlist-btn { 
+  position: absolute; top: 12px; right: 12px; width: 36px; height: 36px;
+  border-radius: 50%; border: none; cursor: pointer;
+  background: white; box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); z-index: 2;
+}
+.wishlist-btn.active { background: var(--color-primary); color: white; }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+</style>

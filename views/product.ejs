@@ -1,0 +1,300 @@
+<!-- Product Detail -->
+<section class="product-detail-section">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <i class="fas fa-chevron-right"></i>
+      <a href="/category/<%= product.category_slug %>"><%= product.category_name %></a>
+      <i class="fas fa-chevron-right"></i>
+      <span><%= product.name %></span>
+    </div>
+
+    <div class="product-detail">
+      <div class="product-gallery">
+        <div class="product-main-image">
+          <% if (product.image && product.image.startsWith('/')) { %>
+            <img src="<%= product.image %>" alt="<%= product.name %>" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">
+          <% } else { %>
+            <div class="product-placeholder large" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
+              <i class="fas fa-gem"></i>
+            </div>
+          <% } %>
+          <% if (product.compare_price) { %>
+            <span class="product-badge sale">Sale</span>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="product-detail-info">
+        <span class="product-category"><%= product.category_name %></span>
+        <h1 class="product-detail-title"><%= product.name %></h1>
+        
+        <!-- Rating display -->
+        <div class="product-rating-display">
+          <span id="avgRating">
+            <% for (let i = 0; i < 5; i++) { %>
+              <i class="<%= i < Math.round(avgRating.avg) ? 'fas' : 'far' %> fa-star" style="color: #c4975a; font-size: 14px;"></i>
+            <% } %>
+          </span>
+          <span id="ratingCount" class="rating-text">(<%= avgRating.count %> reviews)</span>
+        </div>
+        
+        <div class="product-detail-pricing">
+          <span class="product-price large">৳<%= product.price.toLocaleString() %></span>
+          <% if (product.compare_price) { %>
+            <span class="product-compare-price">৳<%= product.compare_price.toLocaleString() %></span>
+            <span class="product-savings">Save ৳<%=(product.compare_price - product.price).toLocaleString() %></span>
+          <% } %>
+        </div>
+
+        <p class="product-short-desc"><%= product.short_description %></p>
+
+        <div class="product-meta">
+          <% if (product.stock > 0) { %>
+            <span class="in-stock"><i class="fas fa-check-circle"></i> In Stock (<%= product.stock %> available)</span>
+          <% } else { %>
+            <span class="out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</span>
+          <% } %>
+          <% if (product.weight) { %>
+            <span class="product-weight"><i class="fas fa-weight"></i> <%= product.weight %></span>
+          <% } %>
+        </div>
+
+        <div class="product-quantity">
+          <label>Quantity:</label>
+          <div class="quantity-selector">
+            <button class="qty-btn" id="qtyMinus">−</button>
+            <input type="number" id="qtyInput" value="1" min="1" max="<%= product.stock %>">
+            <button class="qty-btn" id="qtyPlus">+</button>
+          </div>
+        </div>
+
+        <!-- Variant selection (if available) -->
+        <div id="variantSection" style="display:none;">
+          <div class="product-variants">
+            <label>Size / Variant:</label>
+            <div class="variant-options" id="variantOptions"></div>
+          </div>
+        </div>
+
+        <div class="product-actions-detail">
+          <button class="btn btn-primary btn-lg add-to-cart-btn" data-id="<%= product.id %>">
+            <i class="fas fa-shopping-bag"></i> Add to Cart
+          </button>
+          <button class="btn btn-outline btn-lg wishlist-btn-detail" data-id="<%= product.id %>" onclick="toggleWishlist(this, <%= product.id %>)">
+            <i class="far fa-heart"></i> Wishlist
+          </button>
+        </div>
+
+        <% if (product.ingredients) { %>
+          <div class="product-details-accordion">
+            <div class="accordion-item">
+              <button class="accordion-btn">
+                <span>Ingredients</span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="accordion-content">
+                <p><%= product.ingredients %></p>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="product-details-accordion">
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span>Description</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="accordion-content">
+              <p><%= product.description %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+          <h3 class="reviews-title">Customer Reviews</h3>
+          
+          <!-- Review Form -->
+          <div class="review-form-card">
+            <h4>Write a Review</h4>
+            <form onsubmit="return submitReview(this)">
+              <input type="hidden" name="product_id" value="<%= product.id %>">
+              <div class="review-form-group">
+                <label>Your Name</label>
+                <input type="text" name="user_name" class="form-input" placeholder="Enter your name" required>
+              </div>
+              <div class="review-form-group">
+                <label>Rating</label>
+                <div class="star-rating-input">
+                  <input type="hidden" name="rating" value="0">
+                  <i data-value="1" class="far fa-star"></i>
+                  <i data-value="2" class="far fa-star"></i>
+                  <i data-value="3" class="far fa-star"></i>
+                  <i data-value="4" class="far fa-star"></i>
+                  <i data-value="5" class="far fa-star"></i>
+                </div>
+              </div>
+              <div class="review-form-group">
+                <label>Your Review</label>
+                <textarea name="comment" class="form-input" rows="3" placeholder="Share your experience..." maxlength="500"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Review</button>
+            </form>
+          </div>
+          
+          <!-- Review List -->
+          <div class="review-list">
+            <% if (reviews.length === 0) { %>
+              <p class="no-reviews">No reviews yet. Be the first to review!</p>
+            <% } else { %>
+              <% reviews.forEach(review => { %>
+                <div class="review-item">
+                  <div class="review-header">
+                    <div class="review-avatar"><%= review.user_name.charAt(0).toUpperCase() %></div>
+                    <div>
+                      <strong><%= review.user_name %></strong>
+                      <div class="review-stars">
+                        <% for (let i = 0; i < 5; i++) { %>
+                          <i class="<%= i < review.rating ? 'fas' : 'far' %> fa-star" style="color:#c4975a;font-size:12px;"></i>
+                        <% } %>
+                      </div>
+                    </div>
+                    <span class="review-date"><%= new Date(review.created_at).toLocaleDateString('en-BD') %></span>
+                  </div>
+                  <% if (review.comment) { %>
+                    <p class="review-comment"><%= review.comment %></p>
+                  <% } %>
+                </div>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="share-product">
+          <span>Share:</span>
+          <a href="#" class="share-link"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="share-link"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" class="share-link"><i class="fab fa-messenger"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Related Products -->
+<% if (typeof related !== 'undefined' && related.length > 0) { %>
+  <section class="section related-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">You May Also Like</span>
+        <h2 class="section-title">Related Products</h2>
+      </div>
+      <div class="products-grid">
+        <% related.forEach(product => { %>
+          <div class="product-card">
+            <div class="product-image">
+              <div class="product-placeholder" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
+                <% if (product.image && product.image.startsWith('/')) { %>
+                  <img src="<%= product.image %>" alt="<%= product.name %>" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
+                <% } else { %>
+                  <i class="fas fa-gem"></i>
+                <% } %>
+              </div>
+              <% if (product.compare_price) { %>
+                <span class="product-badge sale">Sale</span>
+              <% } %>
+              <div class="product-actions">
+                <button class="product-action-btn add-to-cart-btn" data-id="<%= product.id %>">
+                  <i class="fas fa-shopping-bag"></i>
+                </button>
+                <a href="/products/<%= product.slug %>" class="product-action-btn">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </div>
+            </div>
+            <div class="product-info">
+              <span class="product-category"><%= product.category_name %></span>
+              <h3 class="product-name"><a href="/products/<%= product.slug %>"><%= product.name %></a></h3>
+              <div class="product-pricing">
+                <span class="product-price">৳<%= product.price.toLocaleString() %></span>
+                <% if (product.compare_price) { %>
+                  <span class="product-compare-price">৳<%= product.compare_price.toLocaleString() %></span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </section>
+<% } %>
+
+<!-- Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Load variants for this product
+  fetch('/variants/<%= product.id %>')
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.variants && data.variants.length > 0) {
+        const section = document.getElementById('variantSection');
+        const options = document.getElementById('variantOptions');
+        if (!section || !options) return;
+        section.style.display = 'block';
+        
+        const groups = {};
+        data.variants.forEach(v => {
+          if (!groups[v.name]) groups[v.name] = [];
+          groups[v.name].push(v);
+        });
+        
+        Object.keys(groups).forEach(groupName => {
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'variant-group';
+          
+          const label = document.createElement('span');
+          label.className = 'variant-label';
+          label.textContent = groupName + ': ';
+          groupDiv.appendChild(label);
+          
+          const btnGroup = document.createElement('div');
+          btnGroup.className = 'variant-btn-group';
+          
+          groups[groupName].forEach(v => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'variant-btn';
+            btn.dataset.variantId = v.id;
+            btn.dataset.priceAdjust = v.price_adjust;
+            btn.dataset.stock = v.stock;
+            btn.textContent = v.value;
+            
+            btn.addEventListener('click', function() {
+              btnGroup.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('selected'));
+              this.classList.add('selected');
+              const hidden = document.querySelector('#selectedVariant') || (() => {
+                const h = document.createElement('input');
+                h.type = 'hidden'; h.id = 'selectedVariant'; h.name = 'variant_id';
+                document.querySelector('.product-actions-detail')?.appendChild(h);
+                return h;
+              })();
+              hidden.value = this.dataset.variantId;
+              
+              const adjust = parseFloat(this.dataset.priceAdjust) || 0;
+              const basePrice = <%= product.price %>;
+              const priceEl = document.querySelector('.product-price.large');
+              if (priceEl) priceEl.textContent = '৳' + (basePrice + adjust).toLocaleString();
+            });
+            
+            btnGroup.appendChild(btn);
+          });
+          
+          groupDiv.appendChild(btnGroup);
+          options.appendChild(groupDiv);
+        });
+      }
+    });
+});
+</script>

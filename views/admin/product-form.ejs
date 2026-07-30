@@ -1,0 +1,270 @@
+<div class="admin-page">
+  <div class="admin-header">
+    <h1><%= product ? 'Edit Product' : 'New Product' %></h1>
+    <a href="/admin/products" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <%= error %></div>
+  <% } %>
+
+  <div class="admin-card">
+    <form method="POST" action="<%= product ? '/admin/products/edit/' + product.id : '/admin/products/new' %>" enctype="multipart/form-data">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" name="name" class="form-input" required value="<%= product ? product.name : '' %>" placeholder="Product name">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category_id" class="form-input">
+            <option value="">Select Category</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.id %>" <%= product && product.category_id == cat.id ? 'selected' : '' %>><%= cat.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price (৳) *</label>
+          <input type="number" name="price" class="form-input" required step="0.01" value="<%= product ? product.price : '' %>" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>Compare Price (৳)</label>
+          <input type="number" name="compare_price" class="form-input" step="0.01" value="<%= product ? product.compare_price || '' : '' %>" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>Stock</label>
+          <input type="number" name="stock" class="form-input" value="<%= product ? product.stock : '10' %>">
+        </div>
+        <div class="form-group">
+          <label>Weight/Size</label>
+          <input type="text" name="weight" class="form-input" value="<%= product ? product.weight : '' %>" placeholder="e.g., 50ml, 30g">
+        </div>
+        <div class="form-group">
+          <label>Featured</label>
+          <select name="featured" class="form-input">
+            <option value="0" <%= product && product.featured == 0 ? 'selected' : '' %>>No</option>
+            <option value="1" <%= product && product.featured == 1 ? 'selected' : '' %>>Yes</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Active</label>
+          <select name="active" class="form-input">
+            <option value="1" <%= !product || product.active == 1 ? 'selected' : '' %>>Active</option>
+            <option value="0" <%= product && product.active == 0 ? 'selected' : '' %>>Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Short Description</label>
+        <input type="text" name="short_description" class="form-input" value="<%= product ? product.short_description : '' %>" placeholder="Brief product description">
+      </div>
+
+      <div class="form-group">
+        <label>Full Description</label>
+        <textarea name="description" class="form-input form-textarea" rows="5" placeholder="Full product description"><%= product ? product.description : '' %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Ingredients</label>
+        <input type="text" name="ingredients" class="form-input" value="<%= product ? product.ingredients : '' %>" placeholder="e.g., Vitamin C, Hyaluronic Acid, ...">
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="form-group">
+        <label>Product Image</label>
+        <div class="upload-area" id="uploadArea">
+          <input type="file" name="image" id="imageInput" accept="image/*" class="upload-input">
+          <div class="upload-placeholder" id="uploadPlaceholder">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Click or drag to upload product image</p>
+            <span>JPG, PNG, WebP (max 5MB)</span>
+          </div>
+          <div class="upload-preview" id="uploadPreview" style="<%= product && product.image ? '' : 'display:none' %>">
+            <img src="<%= product && product.image ? product.image : '' %>" id="previewImg" alt="">
+            <button type="button" class="upload-remove" id="removeImage"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        <input type="hidden" name="image" id="imageUrl" value="<%= product ? product.image : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Additional Images (Gallery)</label>
+        <div class="gallery-upload" id="galleryUpload">
+          <input type="file" id="galleryInput" accept="image/*" multiple class="upload-input">
+          <div class="gallery-grid" id="galleryGrid">
+            <% if (product) {
+              let images = [];
+              try { images = JSON.parse(product.images || '[]'); } catch(e) {}
+              images.forEach(img => { %>
+                <div class="gallery-item">
+                  <img src="<%= img %>" alt="">
+                  <button type="button" class="gallery-remove" data-url="<%= img %>"><i class="fas fa-times"></i></button>
+                </div>
+              <% });
+            } %>
+            <div class="gallery-add" id="galleryAddBtn">
+              <i class="fas fa-plus"></i>
+              <span>Add Images</span>
+            </div>
+          </div>
+          <input type="hidden" name="images" id="imagesUrl" value="<%= product ? product.images || '[]' : '[]' %>">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary"><%= product ? 'Update Product' : 'Create Product' %></button>
+    </form>
+  </div>
+</div>
+
+<style>
+.upload-area {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upload-area:hover { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.upload-input { display: none; }
+.upload-placeholder i { font-size: 48px; color: var(--color-text-light); margin-bottom: 12px; display: block; }
+.upload-placeholder p { font-weight: 500; color: var(--color-text); }
+.upload-placeholder span { font-size: 12px; color: var(--color-text-light); }
+.upload-preview { position: relative; display: inline-block; }
+.upload-preview img { max-height: 200px; border-radius: var(--radius-sm); }
+.upload-remove {
+  position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
+  border-radius: 50%; background: var(--color-error); color: white;
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.gallery-upload { border: 2px dashed var(--color-border); border-radius: var(--radius-md); padding: 20px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.gallery-item {
+  position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+  background: var(--color-bg);
+}
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-remove {
+  position: absolute; top: 4px; right: 4px; width: 24px; height: 24px;
+  border-radius: 50%; background: rgba(0,0,0,0.5); color: white;
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px;
+}
+.gallery-add {
+  aspect-ratio: 1; border: 2px dashed var(--color-border); border-radius: var(--radius-sm);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--color-text-light); transition: all 0.3s;
+}
+.gallery-add:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.gallery-add i { font-size: 24px; }
+.gallery-add span { font-size: 11px; margin-top: 4px; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const uploadArea = document.getElementById('uploadArea');
+  const imageInput = document.getElementById('imageInput');
+  const uploadPreview = document.getElementById('uploadPreview');
+  const previewImg = document.getElementById('previewImg');
+  const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+  const imageUrlInput = document.getElementById('imageUrl');
+
+  if (uploadArea && imageInput) {
+    uploadArea.addEventListener('click', () => imageInput.click());
+    imageInput.addEventListener('change', async function(e) {
+      const file = this.files[0];
+      if (!file) return;
+      
+      // Show preview immediately
+      const reader = new FileReader();
+      reader.onload = function(e2) {
+        previewImg.src = e2.target.result;
+        uploadPreview.style.display = 'inline-block';
+        uploadPlaceholder.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+      
+      // Upload to server
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      try {
+        const res = await fetch('/upload/single', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+          imageUrlInput.value = data.url;
+        }
+      } catch(err) {
+        console.error('Upload error:', err);
+      }
+    });
+  }
+
+  document.getElementById('removeImage')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    uploadPreview.style.display = 'none';
+    uploadPlaceholder.style.display = 'block';
+    imageUrlInput.value = '';
+    imageInput.value = '';
+    previewImg.src = '';
+  });
+
+  // Gallery upload
+  const galleryInput = document.getElementById('galleryInput');
+  const galleryAddBtn = document.getElementById('galleryAddBtn');
+  const galleryGrid = document.getElementById('galleryGrid');
+  const imagesUrlInput = document.getElementById('imagesUrl');
+
+  if (galleryAddBtn && galleryInput) {
+    galleryAddBtn.addEventListener('click', () => galleryInput.click());
+    galleryInput.addEventListener('change', async function(e) {
+      const files = Array.from(this.files);
+      if (files.length === 0) return;
+      
+      const formData = new FormData();
+      files.forEach(f => formData.append('images', f));
+      
+      try {
+        const res = await fetch('/upload/multiple', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+          let currentImages = [];
+          try { currentImages = JSON.parse(imagesUrlInput.value || '[]'); } catch(e) {}
+          
+          data.urls.forEach(url => {
+            currentImages.push(url);
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            div.innerHTML = '<img src="'+url+'" alt=""><button type="button" class="gallery-remove" data-url="'+url+'"><i class="fas fa-times"></i></button>';
+            galleryGrid.insertBefore(div, galleryAddBtn);
+          });
+          
+          imagesUrlInput.value = JSON.stringify(currentImages);
+        }
+      } catch(err) {
+        console.error('Gallery upload error:', err);
+      }
+    });
+  }
+
+  // Remove gallery images
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.gallery-remove');
+    if (!btn) return;
+    
+    const url = btn.dataset.url;
+    btn.closest('.gallery-item').remove();
+    
+    let currentImages = [];
+    try { currentImages = JSON.parse(imagesUrlInput.value || '[]'); } catch(e) {}
+    currentImages = currentImages.filter(i => i !== url);
+    imagesUrlInput.value = JSON.stringify(currentImages);
+  });
+});
+</script>

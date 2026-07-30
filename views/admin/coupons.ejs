@@ -1,0 +1,147 @@
+<!-- Admin Coupons Page -->
+<div class="admin-page">
+  <div class="admin-header">
+    <h1><i class="fas fa-tag"></i> Coupon Management</h1>
+    <button class="btn btn-primary" onclick="showAddCoupon()"><i class="fas fa-plus"></i> New Coupon</button>
+  </div>
+
+  <!-- Add Coupon Form (hidden) -->
+  <div class="admin-card" id="addCouponForm" style="display:none; margin-bottom: 24px;">
+    <h3 style="margin-bottom:16px;">Create New Coupon</h3>
+    <form id="couponForm" onsubmit="return createCoupon(event)" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label>Code</label>
+        <input type="text" name="code" class="form-input" required placeholder="WELCOME10" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select name="type" class="form-input">
+          <option value="percentage">Percentage (%)</option>
+          <option value="fixed">Fixed Amount (৳)</option>
+          <option value="free_shipping">Free Shipping</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Value</label>
+        <input type="number" name="value" class="form-input" required placeholder="10">
+      </div>
+      <div class="form-group">
+        <label>Min Order (৳)</label>
+        <input type="number" name="min_order" class="form-input" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Max Uses</label>
+        <input type="number" name="max_uses" class="form-input" value="100">
+      </div>
+      <div class="form-group">
+        <label>Expires At</label>
+        <input type="date" name="expires_at" class="form-input">
+      </div>
+      <div style="grid-column: 1/-1;">
+        <button type="submit" class="btn btn-primary">Create Coupon</button>
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('addCouponForm').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Coupons Table -->
+  <div class="admin-card">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Type</th>
+          <th>Value</th>
+          <th>Min Order</th>
+          <th>Uses</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="couponTableBody">
+        <tr><td colspan="8" style="text-align:center;padding:32px;">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let couponsData = [];
+
+function loadCoupons() {
+  fetch('/coupons/admin')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) return;
+      couponsData = data.coupons || [];
+      const tbody = document.getElementById('couponTableBody');
+      if (couponsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:#888;">No coupons yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = couponsData.map(c => `
+        <tr>
+          <td><strong>${c.code}</strong></td>
+          <td>${c.type === 'percentage' ? '%' : c.type === 'fixed' ? '৳' : '🚚'}</td>
+          <td>${c.type === 'percentage' ? c.value + '%' : c.type === 'free_shipping' ? '—' : '৳' + c.value}</td>
+          <td>${c.min_order > 0 ? '৳' + c.min_order : '—'}</td>
+          <td>${c.uses}/${c.max_uses}</td>
+          <td>${c.expires_at ? new Date(c.expires_at).toLocaleDateString() : 'Never'}</td>
+          <td><span class="badge ${c.active ? 'badge-success' : 'badge-error'}">${c.active ? 'Active' : 'Inactive'}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline" onclick="deleteCoupon(${c.id})" style="color:#e53935;">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    });
+}
+
+function showAddCoupon() {
+  document.getElementById('addCouponForm').style.display = 'block';
+  document.getElementById('couponForm').reset();
+}
+
+function createCoupon(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {};
+  new FormData(form).forEach((v, k) => data[k] = v);
+  
+  fetch('/admin/coupons/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      showToast('Coupon created! 🎉');
+      form.closest('.admin-card').style.display = 'none';
+      form.reset();
+      loadCoupons();
+    } else {
+      alert(res.message || 'Error creating coupon');
+    }
+  });
+  return false;
+}
+
+function deleteCoupon(id) {
+  if (!confirm('Delete this coupon?')) return;
+  fetch('/admin/coupons/delete/' + id, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        showToast('Coupon deleted');
+        loadCoupons();
+      } else {
+        alert('Error deleting coupon');
+      }
+    });
+}
+
+loadCoupons();
+</script>

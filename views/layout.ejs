@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'ARODRO' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container">
+      <span>✨ Free Shipping on orders over ৳1,500</span>
+      <span class="announcement-divider">|</span>
+      <span>🇧🇩 Premium Cosmetics in Bangladesh</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <button class="mobile-menu-btn" id="menuToggle" aria-label="Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <a href="/" class="logo">
+          <span class="logo-text">ARODRO</span>
+          <span class="logo-tagline">Cosmetics</span>
+        </a>
+
+        <nav class="nav" id="mainNav">
+          <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+            <% categories.forEach(cat => { %>
+              <a href="/category/<%= cat.slug %>" class="nav-link"><%= cat.name %></a>
+            <% }); %>
+          <% } %>
+          <a href="/about" class="nav-link">About</a>
+          <a href="/contact" class="nav-link">Contact</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="icon-btn" id="searchToggle" aria-label="Search">
+            <i class="fas fa-search"></i>
+          </button>
+          <a href="/wishlist" class="icon-btn wishlist-btn-header">
+            <i class="far fa-heart"></i>
+          </a>
+          <a href="/cart" class="icon-btn cart-btn">
+            <i class="fas fa-shopping-bag"></i>
+            <span class="cart-badge" id="cartBadge"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar" id="searchBar">
+      <div class="container">
+        <form action="/search" method="GET" class="search-form">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" name="q" placeholder="Search products..." class="search-input" autocomplete="off">
+          <button type="button" class="search-close" id="searchClose"><i class="fas fa-times"></i></button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <%- body %>
+  </main>
+
+  <!-- Floating Cart Button (Mobile) -->
+  <a href="/cart" class="floating-cart" id="floatingCart">
+    <i class="fas fa-shopping-bag"></i>
+    <span class="cart-badge"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
+  </a>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <div class="toast-content">
+      <i class="fas fa-check-circle toast-icon"></i>
+      <span class="toast-message"></span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3 class="footer-logo">ARODRO</h3>
+          <p class="footer-desc">Premium cosmetics crafted for the modern beauty enthusiast. ARODRO brings you luxury skincare, makeup, haircare, and fragrances.</p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">Shop</h4>
+          <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+            <% categories.forEach(cat => { %>
+              <a href="/category/<%= cat.slug %>" class="footer-link"><%= cat.name %></a>
+            <% }); %>
+          <% } %>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">Customer Care</h4>
+          <a href="/about" class="footer-link">About Us</a>
+          <a href="/contact" class="footer-link">Contact</a>
+          <a href="#" class="footer-link">Shipping Policy</a>
+          <a href="#" class="footer-link">Returns & Exchanges</a>
+          <a href="#" class="footer-link">FAQ</a>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">Contact</h4>
+          <div class="contact-info">
+            <p><i class="fas fa-phone"></i> +880 1XXX-XXXXXX</p>
+            <p><i class="fas fa-envelope"></i> hello@arodro.com</p>
+            <p><i class="fas fa-map-marker-alt"></i> Dhaka, Bangladesh</p>
+          </div>
+          <div class="payment-icons">
+            <i class="fab fa-cc-visa"></i>
+            <i class="fab fa-cc-mastercard"></i>
+            <i class="fas fa-credit-card"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; <%= new Date().getFullYear() %> ARODRO Cosmetics. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

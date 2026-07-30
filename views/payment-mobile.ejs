@@ -1,0 +1,104 @@
+<!-- Mobile Payment Page -->
+<section class="page-header page-header-sm">
+  <div class="container">
+    <h1 class="page-title">Pay with <%= merchant.name %></h1>
+  </div>
+</section>
+
+<section class="section payment-section">
+  <div class="container">
+    <div class="payment-card">
+      <div class="payment-method-header">
+        <i class="fas fa-mobile-alt payment-icon"></i>
+        <h2><%= merchant.name %> Payment</h2>
+      </div>
+
+      <div class="payment-steps">
+        <div class="payment-step">
+          <span class="step-number">1</span>
+          <div class="step-content">
+            <h3>Send Money</h3>
+            <p>Send the total amount to our <%= merchant.type %>:</p>
+            <div class="merchant-number">
+              <span><%= merchant.number %></span>
+              <button class="btn btn-sm btn-outline" onclick="navigator.clipboard.writeText('<%= merchant.number %>')">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="payment-step">
+          <span class="step-number">2</span>
+          <div class="step-content">
+            <h3>Reference</h3>
+            <p>Use this Order ID as reference: <strong><%= orderId %></strong></p>
+          </div>
+        </div>
+
+        <div class="payment-step">
+          <span class="step-number">3</span>
+          <div class="step-content">
+            <h3>Confirm Payment</h3>
+            <p>Send the transaction ID to our WhatsApp or contact page, or wait for our confirmation call.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-note">
+        <i class="fas fa-info-circle"></i>
+        <p>Once we receive your payment, we'll confirm your order and start processing it within 24 hours.</p>
+      </div>
+
+      <div class="payment-actions">
+        <a href="/checkout/confirm/<%= orderId %>" class="btn btn-primary">I've Sent the Payment</a>
+        <a href="/contact" class="btn btn-outline">Need Help?</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.payment-section { min-height: 400px; display: flex; align-items: center; justify-content: center; }
+.payment-card {
+  background: white; border-radius: var(--radius-lg); padding: 48px; 
+  max-width: 600px; margin: 0 auto; box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+.payment-method-header { text-align: center; margin-bottom: 32px; }
+.payment-icon { font-size: 48px; color: var(--color-primary); margin-bottom: 8px; }
+.payment-method-header h2 { font-family: var(--font-heading); font-size: 24px; }
+
+.payment-steps { margin-bottom: 32px; }
+.payment-step {
+  display: flex; gap: 16px; padding: 20px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.payment-step:last-child { border-bottom: none; }
+
+.step-number {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--color-primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px; flex-shrink: 0;
+}
+.step-content h3 { font-size: 16px; margin-bottom: 4px; }
+.step-content p { font-size: 14px; color: var(--color-text-light); }
+
+.merchant-number {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--color-primary-bg); padding: 12px 16px;
+  border-radius: var(--radius-sm); margin-top: 8px;
+}
+.merchant-number span { font-size: 18px; font-weight: 600; letter-spacing: 1px; font-family: monospace; }
+
+.payment-note {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 16px; background: #fff8e1; border-radius: var(--radius-sm);
+  margin-bottom: 24px;
+}
+.payment-note i { color: var(--color-warning); margin-top: 2px; }
+.payment-note p { font-size: 13px; color: var(--color-text); }
+
+.payment-actions { display: flex; gap: 12px; justify-content: center; }
+</style>

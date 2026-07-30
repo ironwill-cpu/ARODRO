@@ -1,0 +1,143 @@
+<!-- Checkout Page -->
+<section class="page-header page-header-sm">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <i class="fas fa-chevron-right"></i>
+      <span>Checkout</span>
+    </div>
+    <h1 class="page-title">Checkout</h1>
+  </div>
+</section>
+
+<section class="section checkout-section">
+  <div class="container">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <%= error %></div>
+    <% } %>
+    
+    <div class="checkout-layout">
+      <div class="checkout-form">
+        <form action="/checkout/place" method="POST" id="checkoutForm">
+          <h3 class="form-section-title">Shipping Information</h3>
+          
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" name="customer_name" class="form-input" required placeholder="Your full name">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" name="customer_phone" class="form-input" required placeholder="01XXXXXXXXX">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" name="customer_email" class="form-input" placeholder="your@email.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Delivery Address *</label>
+            <textarea name="customer_address" class="form-input form-textarea" required placeholder="House, Road, Area, District"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">City *</label>
+              <input type="text" name="city" class="form-input" required placeholder="Dhaka">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes (Optional)</label>
+              <input type="text" name="notes" class="form-input" placeholder="Special instructions">
+            </div>
+          </div>
+
+          <h3 class="form-section-title">Payment Method</h3>
+          <div class="payment-methods">
+            <label class="payment-option">
+              <input type="radio" name="payment_method" value="cod" checked>
+              <div class="payment-option-content">
+                <i class="fas fa-money-bill-wave"></i>
+                <div>
+                  <strong>Cash on Delivery</strong>
+                  <p>Pay when you receive your order</p>
+                </div>
+              </div>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment_method" value="bkash">
+              <div class="payment-option-content">
+                <i class="fas fa-mobile-alt"></i>
+                <div>
+                  <strong>bKash</strong>
+                  <p>Pay via bKash merchant number</p>
+                </div>
+              </div>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment_method" value="nagad">
+              <div class="payment-option-content">
+                <i class="fas fa-mobile-alt"></i>
+                <div>
+                  <strong>Nagad</strong>
+                  <p>Pay via Nagad merchant number</p>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block">Place Order</button>
+        </form>
+      </div>
+
+      <div class="checkout-summary">
+        <h3 class="summary-title">Order Summary</h3>
+        <% cart.forEach(item => { %>
+          <div class="checkout-item">
+            <span class="checkout-item-name"><%= item.name %> × <%= item.quantity %></span>
+            <span class="checkout-item-price">৳<%= (item.price * item.quantity).toLocaleString() %></span>
+          </div>
+        <% }); %>
+        <div class="summary-divider"></div>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>৳<%= subtotal.toLocaleString() %></span>
+        </div>
+        
+        <!-- Coupon -->
+        <div class="coupon-section">
+          <div class="coupon-input-group" id="couponGroup">
+            <input type="text" id="couponCode" class="form-input" placeholder="Coupon code" value="<%= coupon ? coupon.code : '' %>" <%= coupon ? 'disabled' : '' %>>
+            <% if (coupon) { %>
+              <button type="button" class="btn btn-sm btn-outline" onclick="removeCoupon()">✕</button>
+            <% } else { %>
+              <button type="button" class="btn btn-sm btn-primary" onclick="applyCoupon()">Apply</button>
+            <% } %>
+          </div>
+          <div id="couponMessage" class="coupon-message <%= coupon ? 'coupon-success' : '' %>">
+            <% if (coupon) { %>
+              <i class="fas fa-check-circle"></i> Coupon "<%= coupon.code %>" applied! −৳<%= coupon.discount %>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span><%= shipping === 0 ? 'Free' : '৳' + shipping.toLocaleString() %></span>
+        </div>
+        <% if (discount > 0) { %>
+          <div class="summary-row discount-row">
+            <span>Discount</span>
+            <span>−৳<%= discount.toLocaleString() %></span>
+          </div>
+        <% } %>
+        <div class="summary-divider"></div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>৳<%= total.toLocaleString() %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

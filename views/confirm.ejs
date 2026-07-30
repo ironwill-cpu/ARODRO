@@ -1,0 +1,55 @@
+<!-- Order Confirmation -->
+<section class="confirm-section">
+  <div class="container">
+    <div class="confirm-card">
+      <div class="confirm-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h1 class="confirm-title">Order Confirmed! 🎉</h1>
+      <p class="confirm-desc">Thank you for your order. We'll process it shortly.</p>
+      
+      <div class="confirm-order-id">
+        <span>Order ID</span>
+        <strong><%= order.order_id %></strong>
+      </div>
+
+      <div class="confirm-details">
+        <div class="confirm-detail-item">
+          <span class="detail-label">Name</span>
+          <span class="detail-value"><%= order.customer_name %></span>
+        </div>
+        <div class="confirm-detail-item">
+          <span class="detail-label">Phone</span>
+          <span class="detail-value"><%= order.customer_phone %></span>
+        </div>
+        <div class="confirm-detail-item">
+          <span class="detail-label">Address</span>
+          <span class="detail-value"><%= order.customer_address %>, <%= order.city %></span>
+        </div>
+        <div class="confirm-detail-item">
+          <span class="detail-label">Payment</span>
+          <span class="detail-value"><%= order.payment_method.toUpperCase() %></span>
+        </div>
+        <div class="confirm-detail-item">
+          <span class="detail-label">Total</span>
+          <span class="detail-value total">৳<%= order.total.toLocaleString() %></span>
+        </div>
+      </div>
+
+      <div class="confirm-items">
+        <h3>Order Items</h3>
+        <% order.items.forEach(item => { %>
+          <div class="confirm-item">
+            <span><%= item.product_name %> × <%= item.quantity %></span>
+            <span>৳<%= item.total.toLocaleString() %></span>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="confirm-actions">
+        <a href="/" class="btn btn-primary">Continue Shopping</a>
+        <a href="/contact" class="btn btn-outline">Need Help?</a>
+      </div>
+    </div>
+  </div>
+</section>

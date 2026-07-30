@@ -1,0 +1,48 @@
+<div class="admin-page">
+  <div class="admin-header">
+    <h1>Orders</h1>
+    <div class="admin-tabs">
+      <a href="/admin/orders" class="tab-link <%= !currentStatus ? 'active' : '' %>">All</a>
+      <a href="/admin/orders?status=pending" class="tab-link <%= currentStatus === 'pending' ? 'active' : '' %>">Pending</a>
+      <a href="/admin/orders?status=processing" class="tab-link <%= currentStatus === 'processing' ? 'active' : '' %>">Processing</a>
+      <a href="/admin/orders?status=shipped" class="tab-link <%= currentStatus === 'shipped' ? 'active' : '' %>">Shipped</a>
+      <a href="/admin/orders?status=delivered" class="tab-link <%= currentStatus === 'delivered' ? 'active' : '' %>">Delivered</a>
+      <a href="/admin/orders?status=cancelled" class="tab-link <%= currentStatus === 'cancelled' ? 'active' : '' %>">Cancelled</a>
+    </div>
+  </div>
+
+  <div class="admin-table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Phone</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders.length > 0) { %>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td><a href="/admin/orders/<%= order.order_id %>"><%= order.order_id %></a></td>
+              <td><%= order.customer_name %></td>
+              <td><%= order.customer_phone %></td>
+              <td>৳<%= order.total.toLocaleString() %></td>
+              <td><span class="status-badge"><%= order.payment_method.toUpperCase() %></span></td>
+              <td><span class="status-badge status-<%= order.order_status %>"><%= order.order_status %></span></td>
+              <td><%= new Date(order.created_at).toLocaleDateString() %></td>
+              <td><a href="/admin/orders/<%= order.order_id %>" class="btn btn-sm btn-outline">View</a></td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr><td colspan="8" class="admin-empty">No orders found.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

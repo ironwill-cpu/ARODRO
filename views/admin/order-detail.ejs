@@ -1,0 +1,85 @@
+<div class="admin-page">
+  <div class="admin-header">
+    <h1>Order <%= order.order_id %></h1>
+    <a href="/admin/orders" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+
+  <div class="admin-grid">
+    <div class="admin-card">
+      <h3>Customer Information</h3>
+      <p><strong>Name:</strong> <%= order.customer_name %></p>
+      <p><strong>Phone:</strong> <%= order.customer_phone %></p>
+      <p><strong>Email:</strong> <%= order.customer_email || '—' %></p>
+      <p><strong>Address:</strong> <%= order.customer_address %>, <%= order.city %></p>
+      <% if (order.notes) { %><p><strong>Notes:</strong> <%= order.notes %></p><% } %>
+    </div>
+
+    <div class="admin-card">
+      <h3>Order Status</h3>
+      <p><strong>Payment:</strong> <span class="status-badge status-<%= order.payment_status %>"><%= order.payment_status %></span></p>
+      
+      <form action="/admin/orders/<%= order.order_id %>/payment" method="POST" class="inline-form">
+        <label>Update Payment:</label>
+        <select name="status" class="form-input small">
+          <option value="pending" <%= order.payment_status === 'pending' ? 'selected' : '' %>>Pending</option>
+          <option value="paid" <%= order.payment_status === 'paid' ? 'selected' : '' %>>Paid</option>
+          <option value="cancelled" <%= order.payment_status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+      </form>
+
+      <br>
+      <p><strong>Order Status:</strong> <span class="status-badge status-<%= order.order_status %>"><%= order.order_status %></span></p>
+      
+      <form action="/admin/orders/<%= order.order_id %>/status" method="POST" class="inline-form">
+        <label>Update Status:</label>
+        <select name="status" class="form-input small">
+          <option value="pending" <%= order.order_status === 'pending' ? 'selected' : '' %>>Pending</option>
+          <option value="processing" <%= order.order_status === 'processing' ? 'selected' : '' %>>Processing</option>
+          <option value="shipped" <%= order.order_status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+          <option value="delivered" <%= order.order_status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+          <option value="cancelled" <%= order.order_status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <h3>Order Items</h3>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% order.items.forEach(item => { %>
+          <tr>
+            <td><%= item.product_name %></td>
+            <td>৳<%= item.price.toLocaleString() %></td>
+            <td><%= item.quantity %></td>
+            <td>৳<%= item.total.toLocaleString() %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3"><strong>Subtotal</strong></td>
+          <td>৳<%= (order.total - order.shipping).toLocaleString() %></td>
+        </tr>
+        <tr>
+          <td colspan="3"><strong>Shipping</strong></td>
+          <td><%= order.shipping > 0 ? '৳' + order.shipping.toLocaleString() : 'Free' %></td>
+        </tr>
+        <tr>
+          <td colspan="3"><strong>Total</strong></td>
+          <td><strong>৳<%= order.total.toLocaleString() %></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

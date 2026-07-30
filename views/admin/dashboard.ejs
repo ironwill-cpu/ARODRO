@@ -1,0 +1,78 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <h1>Dashboard</h1>
+    <p>Welcome back, Admin</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #e8f5e9; color: #2e7d32;">
+        <i class="fas fa-box"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value"><%= stats.totalProducts %></span>
+        <span class="stat-label">Total Products</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #e3f2fd; color: #1565c0;">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value"><%= stats.totalOrders %></span>
+        <span class="stat-label">Total Orders</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #fff3e0; color: #e65100;">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value"><%= stats.pendingOrders %></span>
+        <span class="stat-label">Pending Orders</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #fce4ec; color: #c62828;">
+        <i class="fas fa-taka"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">৳<%= stats.totalRevenue.toLocaleString() %></span>
+        <span class="stat-label">Total Revenue</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-header">
+      <h2>Recent Orders</h2>
+      <a href="/admin/orders" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <% if (stats.recentOrders && stats.recentOrders.length > 0) { %>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% stats.recentOrders.forEach(order => { %>
+            <tr>
+              <td><a href="/admin/orders/<%= order.order_id %>"><%= order.order_id %></a></td>
+              <td><%= order.customer_name %></td>
+              <td>৳<%= order.total.toLocaleString() %></td>
+              <td><span class="status-badge status-<%= order.order_status %>"><%= order.order_status %></span></td>
+              <td><%= new Date(order.created_at).toLocaleDateString() %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="admin-empty">No orders yet.</p>
+    <% } %>
+  </div>
+</div>

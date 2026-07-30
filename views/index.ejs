@@ -1,0 +1,189 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-content">
+      <span class="hero-subtitle">Welcome to ARODRO</span>
+      <h1 class="hero-title">Where Beauty<br>Meets Elegance</h1>
+      <p class="hero-desc">Discover premium cosmetics crafted for the modern you. From radiant skincare to captivating fragrances.</p>
+      <div class="hero-actions">
+        <a href="/category/skincare" class="btn btn-primary">Shop Now</a>
+        <a href="#featured" class="btn btn-outline">Explore Collection</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Section -->
+<section class="section categories-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Categories</span>
+      <h2 class="section-title">Shop by Category</h2>
+    </div>
+    <div class="categories-grid">
+      <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+        <% categories.forEach(cat => { %>
+          <a href="/category/<%= cat.slug %>" class="category-card">
+            <div class="category-icon">
+              <% if (cat.slug === 'skincare') { %>
+                <i class="fas fa-spa"></i>
+              <% } else if (cat.slug === 'makeup') { %>
+                <i class="fas fa-magic"></i>
+              <% } else if (cat.slug === 'haircare') { %>
+                <i class="fas fa-wind"></i>
+              <% } else if (cat.slug === 'fragrance') { %>
+                <i class="fas fa-flask"></i>
+              <% } else { %>
+                <i class="fas fa-leaf"></i>
+              <% } %>
+            </div>
+            <h3 class="category-name"><%= cat.name %></h3>
+            <p class="category-count"><%= cat.product_count || 0 %> Products</p>
+            <span class="category-arrow"><i class="fas fa-arrow-right"></i></span>
+          </a>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="section featured-section" id="featured">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Featured</span>
+      <h2 class="section-title">Best Sellers</h2>
+    </div>
+    <div class="products-grid">
+      <% if (typeof featured !== 'undefined' && featured.length > 0) { %>
+        <% featured.forEach(product => { %>
+          <div class="product-card">
+            <div class="product-image">
+              <div class="product-placeholder" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
+                <% if (product.image && product.image.startsWith('/')) { %>
+                  <img src="<%= product.image %>" alt="<%= product.name %>" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
+                <% } else { %>
+                  <i class="fas fa-gem"></i>
+                <% } %>
+              </div>
+              <% if (product.compare_price) { %>
+                <span class="product-badge sale">Sale</span>
+              <% } %>
+              <div class="product-actions">
+                <button class="product-action-btn add-to-cart-btn" data-id="<%= product.id %>">
+                  <i class="fas fa-shopping-bag"></i>
+                </button>
+                <a href="/products/<%= product.slug %>" class="product-action-btn">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </div>
+            </div>
+            <div class="product-info">
+              <span class="product-category"><%= product.category_name || '' %></span>
+              <h3 class="product-name"><a href="/products/<%= product.slug %>"><%= product.name %></a></h3>
+              <div class="product-pricing">
+                <span class="product-price">৳<%= product.price.toLocaleString() %></span>
+                <% if (product.compare_price) { %>
+                  <span class="product-compare-price">৳<%= product.compare_price.toLocaleString() %></span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<!-- Category Product Sections -->
+<% if (typeof categoryProducts !== 'undefined') { %>
+  <% Object.entries(categoryProducts).forEach(([slug, products]) => { %>
+    <% if (products.length > 0) { %>
+      <% const cat = categories.find(c => c.slug === slug); %>
+      <section class="section category-products-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-label"><%= cat ? cat.name : '' %></span>
+            <h2 class="section-title"><%= cat ? cat.name : '' %> Collection</h2>
+            <a href="/category/<%= slug %>" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <div class="products-grid">
+            <% products.forEach(product => { %>
+              <div class="product-card">
+                <div class="product-image">
+                  <div class="product-placeholder" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
+                    <i class="fas fa-gem"></i>
+                  </div>
+                  <% if (product.compare_price) { %>
+                    <span class="product-badge sale">Sale</span>
+                  <% } %>
+                  <div class="product-actions">
+                    <button class="product-action-btn add-to-cart-btn" data-id="<%= product.id %>">
+                      <i class="fas fa-shopping-bag"></i>
+                    </button>
+                    <a href="/products/<%= product.slug %>" class="product-action-btn">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                </div>
+                <div class="product-info">
+                  <span class="product-category"><%= product.category_name || '' %></span>
+                  <h3 class="product-name"><a href="/products/<%= product.slug %>"><%= product.name %></a></h3>
+                  <div class="product-pricing">
+                    <span class="product-price">৳<%= product.price.toLocaleString() %></span>
+                    <% if (product.compare_price) { %>
+                      <span class="product-compare-price">৳<%= product.compare_price.toLocaleString() %></span>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+  <% }); %>
+<% } %>
+
+<!-- Features Section -->
+<section class="section features-section">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feature-card">
+        <i class="fas fa-truck feature-icon"></i>
+        <h3 class="feature-title">Free Shipping</h3>
+        <p class="feature-desc">On orders over ৳1,500</p>
+      </div>
+      <div class="feature-card">
+        <i class="fas fa-shield-alt feature-icon"></i>
+        <h3 class="feature-title">100% Authentic</h3>
+        <p class="feature-desc">Genuine products guaranteed</p>
+      </div>
+      <div class="feature-card">
+        <i class="fas fa-undo feature-icon"></i>
+        <h3 class="feature-title">Easy Returns</h3>
+        <p class="feature-desc">7-day return policy</p>
+      </div>
+      <div class="feature-card">
+        <i class="fas fa-headset feature-icon"></i>
+        <h3 class="feature-title">24/7 Support</h3>
+        <p class="feature-desc">Dedicated customer care</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="section newsletter-section">
+  <div class="container">
+    <div class="newsletter-content">
+      <h2 class="newsletter-title">Join the ARODRO Family</h2>
+      <p class="newsletter-desc">Subscribe for exclusive offers, beauty tips, and new arrivals.</p>
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" placeholder="Enter your email" class="newsletter-input" required>
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</section>
