@@ -14,8 +14,9 @@ function requireAuth(req, res, next) {
 // Auto-set admin locals
 router.use((req, res, next) => {
   res.locals.admin = req.session.admin || null;
-  const path = req.path.replace('/admin/', '').replace('/admin', '') || 'dashboard';
-  res.locals.currentPage = path.split('/')[0];
+  res.locals.hideNav = false;
+  const p = req.path === '/' ? 'dashboard' : req.path.replace('/admin/', '').replace('/admin', '');
+  res.locals.currentPage = p.split('/')[1] || p;
   next();
 });
 
