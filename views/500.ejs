@@ -3,7 +3,10 @@
     <div class="error-content">
       <span class="error-code">500</span>
       <h1 class="error-title">Server Error</h1>
-      <p class="error-desc">Something went wrong. Please try again later.</p>
+      <p class="error-desc"><%= typeof errorMessage !== 'undefined' ? errorMessage : 'Something went wrong. Please try again later.' %></p>
+      <% if (typeof errorStack !== 'undefined') { %>
+        <pre style="background:#f5f5f5;padding:15px;border-radius:8px;font-size:12px;max-height:300px;overflow:auto;text-align:left;margin-top:15px;"><%= errorStack %></pre>
+      <% } %>
       <a href="/" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back to Home</a>
     </div>
   </div>
