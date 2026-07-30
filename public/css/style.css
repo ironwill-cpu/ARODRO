@@ -1558,3 +1558,6 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 .variant-btn.selected {
   border-color: var(--color-primary); background: var(--color-primary); color: white;
 }
+
+/* Logo image */
+.logo-img { height: 40px; width: auto; display: block; }

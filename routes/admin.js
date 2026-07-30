@@ -296,7 +296,7 @@ router.get('/settings', async (req, res) => {
     categories,
     cartCount: 0,
     admin: req.session.admin,
-    message: req.query.saved ? '✅ Settings saved! Restart server for color changes.' : null
+    message: req.query.saved ? '✅ All settings saved! Changes are live on the website.' : null
   });
 });
 

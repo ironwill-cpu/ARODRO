@@ -50,7 +50,11 @@
         </button>
 
         <a href="/" class="logo">
-          <span class="logo-text"><%= site.logo_text || site.site_name || 'ARODRO' %></span>
+          <% if (site.logo_image) { %>
+            <img src="<%= site.logo_image %>" alt="<%= site.site_name || 'ARODRO' %>" class="logo-img">
+          <% } else { %>
+            <span class="logo-text"><%= site.logo_text || site.site_name || 'ARODRO' %></span>
+          <% } %>
           <span class="logo-tagline">Cosmetics</span>
         </a>
 
