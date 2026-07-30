@@ -14,7 +14,8 @@ function getPool() {
           database: process.env.PGDATABASE || 'postgres',
           user: process.env.PGUSER || 'postgres.hzdvwkkjhikneqmgtedm',
           password: process.env.PGPASSWORD || 'Artcell@24@',
-          ssl: { rejectUnauthorized: false }
+          ssl: { rejectUnauthorized: false },
+          family: 4
         };
     pool = new Pool(pgConfig);
   }
