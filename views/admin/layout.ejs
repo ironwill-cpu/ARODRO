@@ -9,18 +9,19 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/css/admin.css">
 </head>
-<body class="admin-body">
-  <!-- Admin Nav (visible for all admin pages) -->
+<body class="admin-body<%= hideNav ? ' login-page' : '' %>">
+  <% if (!hideNav) { %>
+  <!-- Admin Nav -->
   <nav class="admin-nav">
     <div class="admin-nav-inner">
       <a href="/admin" class="admin-logo">ARODRO <span>Admin</span></a>
       <div class="admin-nav-links">
-        <a href="/admin" class="admin-nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
-        <a href="/admin/products" class="admin-nav-link"><i class="fas fa-box"></i> Products</a>
-        <a href="/admin/categories" class="admin-nav-link"><i class="fas fa-tags"></i> Categories</a>
-        <a href="/admin/orders" class="admin-nav-link"><i class="fas fa-truck"></i> Orders</a>
-        <a href="/admin/coupons" class="admin-nav-link"><i class="fas fa-tag"></i> Coupons</a>
-        <a href="/admin/settings" class="admin-nav-link"><i class="fas fa-paint-brush"></i> Settings</a>
+        <a href="/admin" class="admin-nav-link<%= currentPage === 'dashboard' ? ' active' : '' %>"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="/admin/products" class="admin-nav-link<%= currentPage === 'products' ? ' active' : '' %>"><i class="fas fa-box"></i> Products</a>
+        <a href="/admin/categories" class="admin-nav-link<%= currentPage === 'categories' ? ' active' : '' %>"><i class="fas fa-tags"></i> Categories</a>
+        <a href="/admin/orders" class="admin-nav-link<%= currentPage === 'orders' ? ' active' : '' %>"><i class="fas fa-truck"></i> Orders</a>
+        <a href="/admin/coupons" class="admin-nav-link<%= currentPage === 'coupons' ? ' active' : '' %>"><i class="fas fa-tag"></i> Coupons</a>
+        <a href="/admin/settings" class="admin-nav-link<%= currentPage === 'settings' ? ' active' : '' %>"><i class="fas fa-paint-brush"></i> Settings</a>
         <a href="/admin/logout" class="admin-nav-link logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
       </div>
       <a href="/" class="admin-view-site"><i class="fas fa-external-link-alt"></i> <span>View Site</span></a>
@@ -30,5 +31,8 @@
   <main class="admin-main">
     <%- body %>
   </main>
+  <% } else { %>
+    <%- body %>
+  <% } %>
 </body>
 </html>

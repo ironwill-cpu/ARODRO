@@ -11,6 +11,14 @@ function requireAuth(req, res, next) {
   res.redirect('/admin/login');
 }
 
+// Auto-set admin locals
+router.use((req, res, next) => {
+  res.locals.admin = req.session.admin || null;
+  const path = req.path.replace('/admin/', '').replace('/admin', '') || 'dashboard';
+  res.locals.currentPage = path.split('/')[0];
+  next();
+});
+
 router.use(requireAuth);
 
 // Login
@@ -19,7 +27,8 @@ router.get('/login', (req, res) => {
   res.render('admin/login', { 
     title: 'Admin Login — ARODRO', 
     error: null, 
-    layout: 'admin/layout' 
+    layout: 'admin/layout',
+    hideNav: true 
   });
 });
 
