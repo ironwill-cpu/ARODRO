@@ -34,39 +34,51 @@ router.get('/login', (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  console.log('LOGIN ATTEMPT:', username);
   
   // Support both SQLite and PostgreSQL
   let user = null;
   try {
     // Try PostgreSQL style first
-    const r = await db.query ? db.query('SELECT * FROM admin_users WHERE username = $1', [username]) : null;
+    const r = await db.query('SELECT * FROM admin_users WHERE username = $1', [username]);
     user = r && r.rows ? r.rows[0] : null;
+    console.log('PG query result:', user ? 'found' : 'not found');
   } catch (e) {
-    // Fall through to SQLite style
+    console.log('PG query failed, trying SQLite:', e.message);
   }
   
   if (!user) {
     try {
-      // Try SQLite style
-      const d = await db.getDb();
-      const stmt = d.prepare('SELECT * FROM admin_users WHERE username = ?');
-      stmt.bind([username]);
-      if (stmt.step()) {
-        user = stmt.getAsObject();
+      // Try SQLite style (only when using SQLite fallback)
+      const { default: dbSqlite } = require('../database');
+      if (dbSqlite.getDb) {
+        const d = await dbSqlite.getDb();
+        const stmt = d.prepare('SELECT * FROM admin_users WHERE username = ?');
+        stmt.bind([username]);
+        if (stmt.step()) {
+          user = stmt.getAsObject();
+        }
+        stmt.free();
+        console.log('SQLite result:', user ? 'found' : 'not found');
       }
-      stmt.free();
     } catch (e2) {
       console.error('Login query failed:', e2.message);
     }
   }
   
   if (user) {
+    console.log('Comparing password...');
     if (bcrypt.compareSync(password, user.password)) {
+      console.log('Password match! Setting session...');
       req.session.admin = { id: user.id, username: user.username };
+      console.log('Session set! Redirecting...');
       return res.redirect('/admin');
+    } else {
+      console.log('Password mismatch');
     }
   }
   
+  console.log('Login failed, rendering form');
   res.render('admin/login', { 
     title: 'Admin Login — ARODRO', 
     error: 'Invalid credentials', 
