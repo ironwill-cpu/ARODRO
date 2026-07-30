@@ -161,7 +161,7 @@ function removeSettingImage(key) {
   fetch('/admin/settings/update', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key, value: '' })
+    body: JSON.stringify({ ['setting_' + key]: '' })
   })
   .then(r => r.json())
   .then(data => {

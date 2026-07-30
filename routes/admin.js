@@ -335,7 +335,7 @@ router.post('/settings/upload-image', uploadSetting.single('image'), async (req,
   if (!req.session.admin) return res.status(401).json({ success: false });
   if (!req.file) return res.status(400).json({ success: false, message: 'No file' });
   
-  const key = req.body.key || 'hero_image';
+  const key = req.body.setting_key || req.body.key || 'hero_image';
   const filePath = req.file.path;
   
   // Try Supabase Storage first
