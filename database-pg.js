@@ -5,10 +5,18 @@ let pool = null;
 
 function getPool() {
   if (!pool) {
-    pool = new Pool({
-      connectionString: process.env.SUPABASE_DB_URL,
-      ssl: { rejectUnauthorized: false }
-    });
+    // Support both connection string and individual params
+    const url = process.env.SUPABASE_DB_URL;
+    const pgConfig = url ? { connectionString: url, ssl: { rejectUnauthorized: false } } 
+      : {
+          host: process.env.PGHOST || 'db.hzdvwkkjhikneqmgtedm.supabase.co',
+          port: parseInt(process.env.PGPORT || '5432'),
+          database: process.env.PGDATABASE || 'postgres',
+          user: process.env.PGUSER || 'postgres.hzdvwkkjhikneqmgtedm',
+          password: process.env.PGPASSWORD || 'Artcell@24@',
+          ssl: { rejectUnauthorized: false }
+        };
+    pool = new Pool(pgConfig);
   }
   return pool;
 }
