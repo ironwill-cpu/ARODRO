@@ -1,54 +1,40 @@
-<div class="admin-dashboard">
-  <div class="admin-header">
+<div class="page-header">
+  <div>
     <h1>Dashboard</h1>
     <p>Welcome back, Admin</p>
   </div>
+</div>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon" style="background: #e8f5e9; color: #2e7d32;">
-        <i class="fas fa-box"></i>
-      </div>
-      <div class="stat-info">
-        <span class="stat-value"><%= stats.totalProducts %></span>
-        <span class="stat-label">Total Products</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background: #e3f2fd; color: #1565c0;">
-        <i class="fas fa-shopping-cart"></i>
-      </div>
-      <div class="stat-info">
-        <span class="stat-value"><%= stats.totalOrders %></span>
-        <span class="stat-label">Total Orders</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background: #fff3e0; color: #e65100;">
-        <i class="fas fa-clock"></i>
-      </div>
-      <div class="stat-info">
-        <span class="stat-value"><%= stats.pendingOrders %></span>
-        <span class="stat-label">Pending Orders</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background: #fce4ec; color: #c62828;">
-        <i class="fas fa-taka"></i>
-      </div>
-      <div class="stat-info">
-        <span class="stat-value">৳<%= stats.totalRevenue.toLocaleString() %></span>
-        <span class="stat-label">Total Revenue</span>
-      </div>
-    </div>
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon products"><i class="fas fa-box"></i></div>
+    <div class="stat-value"><%= stats.totalProducts %></div>
+    <div class="stat-label">Total Products</div>
   </div>
+  <div class="stat-card">
+    <div class="stat-icon orders"><i class="fas fa-shopping-cart"></i></div>
+    <div class="stat-value"><%= stats.totalOrders %></div>
+    <div class="stat-label">Total Orders</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
+    <div class="stat-value"><%= stats.pendingOrders %></div>
+    <div class="stat-label">Pending Orders</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon revenue"><i class="fas fa-taka"></i></div>
+    <div class="stat-value">৳<%= stats.totalRevenue.toLocaleString() %></div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+</div>
 
-  <div class="admin-section">
-    <div class="admin-section-header">
-      <h2>Recent Orders</h2>
-      <a href="/admin/orders" class="btn btn-outline btn-sm">View All</a>
-    </div>
-    <% if (stats.recentOrders && stats.recentOrders.length > 0) { %>
+<div class="section-card">
+  <div class="section-title">
+    <span>Recent Orders</span>
+    <a href="/admin/orders" class="btn btn-outline btn-sm">View All</a>
+  </div>
+  <% if (stats.recentOrders && stats.recentOrders.length > 0) { %>
+    <div class="table-container">
       <table class="admin-table">
         <thead>
           <tr>
@@ -65,14 +51,18 @@
               <td><a href="/admin/orders/<%= order.order_id %>"><%= order.order_id %></a></td>
               <td><%= order.customer_name %></td>
               <td>৳<%= order.total.toLocaleString() %></td>
-              <td><span class="status-badge status-<%= order.order_status %>"><%= order.order_status %></span></td>
+              <td><span class="badge badge-<%= order.order_status === 'delivered' ? 'success' : 'warning' %>"><%= order.order_status %></span></td>
               <td><%= new Date(order.created_at).toLocaleDateString() %></td>
             </tr>
           <% }); %>
         </tbody>
       </table>
-    <% } else { %>
-      <p class="admin-empty">No orders yet.</p>
-    <% } %>
-  </div>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <i class="fas fa-shopping-bag"></i>
+      <h3>No orders yet</h3>
+      <p>Orders will appear here once customers start shopping.</p>
+    </div>
+  <% } %>
 </div>

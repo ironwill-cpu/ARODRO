@@ -1,33 +1,42 @@
-<div class="admin-page">
-  <div class="admin-header">
+<div class="page-header">
+  <div>
     <h1>Products</h1>
-    <a href="/admin/products/new" class="btn btn-primary"><i class="fas fa-plus"></i> Add Product</a>
+    <p><%= products.length %> total products</p>
   </div>
+  <a href="/admin/products/new" class="btn btn-primary"><i class="fas fa-plus"></i> Add Product</a>
+</div>
 
-  <div class="admin-table-container">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th>Featured</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (products.length > 0) { %>
+<div class="section-card">
+  <% if (products.length > 0) { %>
+    <div class="table-container">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Featured</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
           <% products.forEach(product => { %>
             <tr>
+              <td>
+                <% if (product.image) { %>
+                  <img src="<%= product.image %>" alt="<%= product.name %>" class="product-thumb">
+                <% } else { %>
+                  <div class="product-thumb" style="background:#f0e6df;display:flex;align-items:center;justify-content:center;color:#ccc;"><i class="fas fa-gem"></i></div>
+                <% } %>
+              </td>
               <td><strong><%= product.name %></strong></td>
               <td><%= product.category_name || '—' %></td>
-              <td>৳<%= product.price.toLocaleString() %></td>
+              <td>৳<%= Number(product.price).toLocaleString() %></td>
               <td><%= product.stock %></td>
               <td><%= product.featured ? '⭐' : '—' %></td>
-              <td><span class="status-badge status-<%= product.active ? 'active' : 'inactive' %>"><%= product.active ? 'Active' : 'Inactive' %></span></td>
-              <td class="actions-cell">
+              <td style="white-space:nowrap">
                 <a href="/admin/products/edit/<%= product.id %>" class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></a>
                 <form action="/admin/products/delete/<%= product.id %>" method="POST" style="display:inline" onsubmit="return confirm('Delete this product?')">
                   <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
@@ -35,10 +44,15 @@
               </td>
             </tr>
           <% }); %>
-        <% } else { %>
-          <tr><td colspan="7" class="admin-empty">No products yet. <a href="/admin/products/new">Add your first product</a></td></tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <i class="fas fa-box-open"></i>
+      <h3>No products yet</h3>
+      <p>Start by adding your first product.</p>
+      <a href="/admin/products/new" class="btn btn-primary" style="margin-top:12px"><i class="fas fa-plus"></i> Add Product</a>
+    </div>
+  <% } %>
 </div>
