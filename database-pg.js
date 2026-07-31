@@ -78,7 +78,20 @@ async function initDb() {
       key TEXT PRIMARY KEY, value TEXT, type TEXT DEFAULT 'text', group_name TEXT DEFAULT 'general'
     );
   `);
-  
+
+  // Auto-migrate: add missing columns if they don't exist
+  try {
+    await p.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS compare_price DECIMAL(10,2) DEFAULT NULL');
+    await p.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS ingredients TEXT DEFAULT NULL');
+    await p.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS weight VARCHAR(50) DEFAULT NULL');
+    await p.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()');
+    await p.query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS icon TEXT DEFAULT NULL');
+    await p.query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS image TEXT DEFAULT NULL');
+    console.log('✓ Schema migrations applied');
+  } catch(e) {
+    console.log('  Migration note:', e.message.substring(0,80));
+  }
+
   // Ensure admin exists
   const admins = await p.query("SELECT id FROM admin_users WHERE username = 'admin'");
   if (admins.rows.length === 0) {
@@ -156,7 +169,7 @@ async function searchProducts(q) {
 
 // === CATEGORY QUERIES ===
 async function getCategories() {
-  const r = await query('SELECT * FROM categories ORDER BY name');
+  const r = await query('SELECT c.*, COUNT(p.id)::int as product_count FROM categories c LEFT JOIN products p ON c.id = p.category_id GROUP BY c.id ORDER BY c.name');
   return r.rows;
 }
 

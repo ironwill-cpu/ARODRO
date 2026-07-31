@@ -212,19 +212,14 @@ router.post('/products/delete/:id', async (req, res) => {
 
 // Categories management
 router.get('/categories', async (req, res) => {
-  let categories;
-  try {
-    categories = await db.getCategoriesWithProductCount();
-  } catch(e) {
-    categories = await db.getCategories();
-  }
+  const categories = await db.getCategories();
   res.render('admin/categories', { 
     title: 'Categories — ARODRO Admin',
-    categories, cartCount: 0,
-    layout: 'admin/layout'
+    layout: 'admin/layout', hideNav: false,
+    currentPage: 'categories',
+    categories, cartCount: 0
   });
 });
-
 router.post('/categories/create', async (req, res) => {
   try {
     // Auto-generate slug if not provided
