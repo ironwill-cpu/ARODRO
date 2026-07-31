@@ -92,6 +92,19 @@ async function initDb() {
     console.log('  Migration note:', e.message.substring(0,80));
   }
 
+  // Auto-fix: sync SERIAL sequences so new rows never conflict with existing IDs
+  try {
+    const tables = ['products', 'categories', 'orders', 'coupons', 'reviews', 'wishlists', 'product_variants'];
+    for (const t of tables) {
+      try {
+        await p.query(`SELECT setval(pg_get_serial_sequence('${t}', 'id'), (SELECT MAX(id) FROM ${t})) WHERE (SELECT MAX(id) FROM ${t}) IS NOT NULL`);
+      } catch(e) { /* table may not have a sequence or no rows */ }
+    }
+    console.log('✓ Sequences synced');
+  } catch(e) {
+    console.log('  Sequence note:', e.message.substring(0,80));
+  }
+
   // Ensure admin exists
   const admins = await p.query("SELECT id FROM admin_users WHERE username = 'admin'");
   if (admins.rows.length === 0) {
