@@ -51,7 +51,7 @@
               <td><a href="/admin/orders/<%= order.order_id %>"><%= order.order_id %></a></td>
               <td><%= order.customer_name %></td>
               <td>৳<%= order.total.toLocaleString() %></td>
-              <td><span class="badge badge-<%= order.order_status === 'delivered' ? 'success' : 'warning' %>"><%= order.order_status %></span></td>
+              <td><span class="badge badge-<%= order.status === 'delivered' ? 'success' : 'warning' %>"><%= order.status %></span></td>
               <td><%= new Date(order.created_at).toLocaleDateString() %></td>
             </tr>
           <% }); %>

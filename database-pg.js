@@ -87,6 +87,9 @@ async function initDb() {
     await p.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()');
     await p.query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS icon TEXT DEFAULT NULL');
     await p.query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS image TEXT DEFAULT NULL');
+    // orders: add order_id column and backfill existing rows
+    await p.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_id TEXT');
+    await p.query("UPDATE orders SET order_id = 'ARO-' || id || '-LEGACY' WHERE order_id IS NULL");
     console.log('✓ Schema migrations applied');
   } catch(e) {
     console.log('  Migration note:', e.message.substring(0,80));
@@ -207,19 +210,24 @@ async function deleteCategory(id) {
 }
 
 // === ORDER QUERIES ===
+function generateOrderId() {
+  return 'ARO-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+}
+
 async function createOrder(data) {
+  const orderId = generateOrderId();
   const r = await query(
-    `INSERT INTO orders (customer_name, customer_email, customer_phone, customer_address, city, notes, subtotal, shipping, discount, total, payment_method, status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
-    [data.customer_name, data.customer_email, data.customer_phone, data.customer_address, data.city, data.notes, data.subtotal, data.shipping, data.discount || 0, data.total, data.payment_method, data.status || 'pending']
+    `INSERT INTO orders (order_id, customer_name, customer_email, customer_phone, customer_address, city, notes, subtotal, shipping, discount, total, payment_method, status)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
+    [orderId, data.customer_name, data.customer_email, data.customer_phone, data.customer_address, data.city, data.notes, data.subtotal, data.shipping, data.discount || 0, data.total, data.payment_method, data.status || 'pending']
   );
-  const orderId = r.rows[0].id;
+  const dbId = r.rows[0].id;
   
   if (data.items) {
     for (const item of data.items) {
       await query(
         'INSERT INTO order_items (order_id, product_id, product_name, price, quantity, total) VALUES ($1,$2,$3,$4,$5,$6)',
-        [orderId, item.product_id, item.product_name, item.price, item.quantity, item.total]
+        [dbId, item.product_id, item.product_name, item.price, item.quantity, item.total]
       );
     }
   }
@@ -227,15 +235,21 @@ async function createOrder(data) {
 }
 
 async function getOrder(id) {
-  const r = await query('SELECT * FROM orders WHERE id = $1', [id]);
+  // Look up by order_id string OR numeric id (backward compatible)
+  const r = await query('SELECT * FROM orders WHERE order_id = $1 OR id::text = $1', [id]);
   if (r.rows.length === 0) return null;
   const order = r.rows[0];
-  const items = await query('SELECT * FROM order_items WHERE order_id = $1', [id]);
+  const items = await query('SELECT * FROM order_items WHERE order_id = $1', [order.id]);
   order.order_items = items.rows;
+  order.items = items.rows; // alias for templates
   return order;
 }
 
-async function getOrders() {
+async function getOrders(status = null) {
+  if (status) {
+    const r = await query('SELECT * FROM orders WHERE status = $1 ORDER BY created_at DESC', [status]);
+    return r.rows;
+  }
   const r = await query('SELECT * FROM orders ORDER BY created_at DESC');
   return r.rows;
 }
@@ -246,11 +260,11 @@ async function getRecentOrders(limit = 5) {
 }
 
 async function updateOrderStatus(id, status) {
-  await query('UPDATE orders SET status = $1 WHERE id = $2', [status, id]);
+  await query('UPDATE orders SET status = $1 WHERE order_id = $2 OR id::text = $2', [status, id]);
 }
 
 async function updatePaymentStatus(id, status) {
-  await query('UPDATE orders SET payment_status = $1 WHERE id = $2', [status, id]);
+  await query('UPDATE orders SET payment_status = $1 WHERE order_id = $2 OR id::text = $2', [status, id]);
 }
 
 // === DASHBOARD ===
@@ -259,7 +273,16 @@ async function getDashboardStats() {
   const r2 = await query('SELECT COUNT(*) as c FROM orders');
   const r3 = await query('SELECT COUNT(*) as c FROM reviews');
   const r4 = await query('SELECT COALESCE(SUM(total),0) as c FROM orders WHERE status!=\'cancelled\'');
-  return { totalProducts: Number(r1.rows[0].c), totalOrders: Number(r2.rows[0].c), totalReviews: Number(r3.rows[0].c), totalRevenue: Number(r4.rows[0].c) };
+  const r5 = await query('SELECT COUNT(*) as c FROM orders WHERE status = \'pending\'');
+  const r6 = await query('SELECT * FROM orders ORDER BY created_at DESC LIMIT 5');
+  return {
+    totalProducts: Number(r1.rows[0].c),
+    totalOrders: Number(r2.rows[0].c),
+    totalReviews: Number(r3.rows[0].c),
+    totalRevenue: Number(r4.rows[0].c),
+    pendingOrders: Number(r5.rows[0].c),
+    recentOrders: r6.rows
+  };
 }
 
 // === REVIEWS ===

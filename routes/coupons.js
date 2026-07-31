@@ -52,6 +52,7 @@ router.post('/remove', (req, res) => {
 // Admin: Get all coupons
 router.get('/admin', async (req, res) => {
   try {
+    if (!req.session.admin) return res.status(401).json({ success: false, message: 'Unauthorized' });
     const coupons = await db.getAllCoupons();
     res.json({ success: true, coupons });
   } catch (err) {

@@ -34,9 +34,14 @@
               <td><%= order.customer_phone %></td>
               <td>৳<%= order.total.toLocaleString() %></td>
               <td><span class="status-badge"><%= order.payment_method.toUpperCase() %></span></td>
-              <td><span class="status-badge status-<%= order.order_status %>"><%= order.order_status %></span></td>
+              <td>
+                <span class="status-badge status-<%= order.status %>"><%= order.status %></span>
+              </td>
               <td><%= new Date(order.created_at).toLocaleDateString() %></td>
-              <td><a href="/admin/orders/<%= order.order_id %>" class="btn btn-sm btn-outline">View</a></td>
+              <td style="white-space:nowrap">
+                <a href="/admin/orders/<%= order.order_id %>" class="btn btn-sm btn-outline">View</a>
+                <button class="btn btn-sm btn-outline" onclick="quickStatus('<%= order.order_id %>')" style="margin-left:4px;">⚡ Status</button>
+              </td>
             </tr>
           <% }); %>
         <% } else { %>
@@ -46,3 +51,22 @@
     </table>
   </div>
 </div>
+
+<script>
+function quickStatus(orderId) {
+  const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const current = prompt('Change status for ' + orderId + ':\n1. Pending\n2. Processing\n3. Shipped\n4. Delivered\n5. Cancelled\n\nEnter number (1-5):');
+  if (!current) return;
+  const idx = parseInt(current) - 1;
+  if (isNaN(idx) || idx < 0 || idx >= statuses.length) { alert('Invalid choice!'); return; }
+  const status = statuses[idx];
+  fetch('/admin/orders/' + orderId + '/status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'status=' + status
+  }).then(r => {
+    if (r.redirected) location.reload();
+    else location.reload();
+  });
+}
+</script>
