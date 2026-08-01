@@ -1,7 +1,48 @@
 /* ARODRO Cosmetics - Main JavaScript */
 
 document.addEventListener('DOMContentLoaded', function() {
-  
+
+  // Hero Auto-Slider
+  const heroSlider = document.getElementById('heroSlider');
+  if (heroSlider) {
+    const slides = heroSlider.querySelectorAll('.hero-slide');
+    const dots = heroSlider.querySelectorAll('.hero-dot');
+    let current = 0;
+    let timer = null;
+
+    function goToSlide(index) {
+      slides.forEach(s => s.classList.remove('active'));
+      dots.forEach(d => d.classList.remove('active'));
+      current = (index + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      dots[current].classList.add('active');
+    }
+
+    function nextSlide() { goToSlide(current + 1); }
+
+    function startAuto() {
+      if (slides.length < 2) return;
+      stopAuto();
+      timer = setInterval(nextSlide, 5000);
+    }
+
+    function stopAuto() {
+      if (timer) { clearInterval(timer); timer = null; }
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', function() {
+        goToSlide(parseInt(this.dataset.slide));
+        startAuto(); // restart timer after manual nav
+      });
+    });
+
+    heroSlider.addEventListener('mouseenter', stopAuto);
+    heroSlider.addEventListener('mouseleave', startAuto);
+
+    startAuto();
+  }
+
   // Mobile Menu Toggle
   const menuToggle = document.getElementById('menuToggle');
   const mainNav = document.getElementById('mainNav');
