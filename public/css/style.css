@@ -432,11 +432,11 @@ img { max-width: 100%; height: auto; }
 
 .hero-title {
   font-family: var(--font-heading);
-  font-size: 56px;
-  font-weight: 700;
+  font-size: 72px;
+  font-weight: 800;
   color: var(--color-white);
-  line-height: 1.15;
-  margin: 16px 0;
+  line-height: 1.12;
+  margin: 20px 0 0;
 }
 
 .hero-desc {
@@ -1623,7 +1623,7 @@ img { max-width: 100%; height: auto; }
   .mobile-menu-btn { display: block; }
   
   .hero { padding: 60px 0; min-height: auto; }
-  .hero-title { font-size: 36px; }
+  .hero-title { font-size: 42px; }
   .hero-actions { flex-direction: column; }
   
   .products-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
