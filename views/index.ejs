@@ -3,12 +3,12 @@
   <div class="hero-bg"></div>
   <div class="container">
     <div class="hero-content">
-      <span class="hero-subtitle">Welcome to <%= site.site_name || 'ARODRO' %></span>
-      <h1 class="hero-title"><%= site.hero_title || 'Where Beauty<br>Meets Elegance' %></h1>
-      <p class="hero-desc"><%= site.hero_subtitle || 'Discover premium cosmetics crafted for the modern you. From radiant skincare to captivating fragrances.' %></p>
+      <span class="hero-subtitle" style="color:<%= site.hero_subtitle_color || '#ffffff' %>;">Welcome to <%= site.site_name || 'ARODRO' %></span>
+      <h1 class="hero-title" style="color:<%= site.hero_title_color || '#ffffff' %>;"><%= site.hero_title || 'Where Beauty<br>Meets Elegance' %></h1>
+      <p class="hero-desc" style="color:<%= site.hero_desc_color || '#ffffff' %>;"><%= site.hero_subtitle || 'Discover premium cosmetics crafted for the modern you. From radiant skincare to captivating fragrances.' %></p>
       <div class="hero-actions">
-        <a href="/#cat-fragrance" class="btn btn-primary shop-scroll-link"><%= site.hero_button_text || 'Shop Now' %></a>
-        <a href="#featured" class="btn btn-outline">Explore Collection</a>
+        <a href="/#cat-fragrance" class="btn btn-primary shop-scroll-link" style="background:<%= site.hero_btn1_bg || '#c4975a' %>;color:<%= site.hero_btn1_text || '#ffffff' %>;"><%= site.hero_button_text || 'Shop Now' %></a>
+        <a href="#featured" class="btn btn-outline" style="color:<%= site.hero_btn2_text || '#ffffff' %>;border-color:<%= site.hero_btn2_text || '#ffffff' %>;">Explore Collection</a>
       </div>
     </div>
   </div>

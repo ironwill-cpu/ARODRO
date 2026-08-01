@@ -378,7 +378,9 @@ router.post('/hero/update', async (req, res) => {
   if (!req.session.admin) return res.status(401).json({ success: false });
   try {
     const keys = ['hero_image', 'hero_title', 'hero_subtitle', 'hero_button_text', 'hero_button_link',
-                  'hero_align', 'hero_position', 'hero_size', 'hero_overlay', 'hero_title_size'];
+                  'hero_align', 'hero_position', 'hero_size', 'hero_overlay', 'hero_title_size',
+                  'hero_title_color', 'hero_subtitle_color', 'hero_desc_color',
+                  'hero_btn1_bg', 'hero_btn1_text', 'hero_btn2_bg', 'hero_btn2_text'];
     for (const key of keys) {
       if (req.body[key] !== undefined) {
         await db.updateSetting(key, req.body[key]);

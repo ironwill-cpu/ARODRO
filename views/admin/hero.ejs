@@ -104,6 +104,56 @@
       </div>
     </div>
 
+    <!-- 4. Color Plate -->
+    <div class="admin-card" style="margin-bottom:20px;">
+      <h3 style="margin-bottom:16px;">🎨 Color Plate (রং বদলান)</h3>
+      <div class="hero-form-grid">
+        <div class="form-group">
+          <label class="setting-label">Title Color (বড় লেখার রং)</label>
+          <div class="color-picker-wrap">
+            <input type="color" class="color-picker" value="<%= site.hero_title_color || '#ffffff' %>" onchange="document.getElementById('color_hero_title_color').value=this.value;">
+            <input type="text" name="hero_title_color" id="color_hero_title_color" class="form-input color-input" value="<%= site.hero_title_color || '#ffffff' %>">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="setting-label">Subtitle Color (ছোট লেখার রং)</label>
+          <div class="color-picker-wrap">
+            <input type="color" class="color-picker" value="<%= site.hero_subtitle_color || '#ffffff' %>" onchange="document.getElementById('color_hero_subtitle_color').value=this.value;">
+            <input type="text" name="hero_subtitle_color" id="color_hero_subtitle_color" class="form-input color-input" value="<%= site.hero_subtitle_color || '#ffffff' %>">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="setting-label">Description Color (বর্ণনার রং)</label>
+          <div class="color-picker-wrap">
+            <input type="color" class="color-picker" value="<%= site.hero_desc_color || '#ffffff' %>" onchange="document.getElementById('color_hero_desc_color').value=this.value;">
+            <input type="text" name="hero_desc_color" id="color_hero_desc_color" class="form-input color-input" value="<%= site.hero_desc_color || '#ffffff' %>">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="setting-label">Button 1 Background (প্রথম বাটনের রং)</label>
+          <div class="color-picker-wrap">
+            <input type="color" class="color-picker" value="<%= site.hero_btn1_bg || '#c4975a' %>" onchange="document.getElementById('color_hero_btn1_bg').value=this.value;">
+            <input type="text" name="hero_btn1_bg" id="color_hero_btn1_bg" class="form-input color-input" value="<%= site.hero_btn1_bg || '#c4975a' %>">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="setting-label">Button 1 Text Color</label>
+          <div class="color-picker-wrap">
+            <input type="color" class="color-picker" value="<%= site.hero_btn1_text || '#ffffff' %>" onchange="document.getElementById('color_hero_btn1_text').value=this.value;">
+            <input type="text" name="hero_btn1_text" id="color_hero_btn1_text" class="form-input color-input" value="<%= site.hero_btn1_text || '#ffffff' %>">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="setting-label">Button 2 Text Color (Explore)</label>
+          <div class="color-picker-wrap">
+            <input type="color" class="color-picker" value="<%= site.hero_btn2_text || '#ffffff' %>" onchange="document.getElementById('color_hero_btn2_text').value=this.value;">
+            <input type="text" name="hero_btn2_text" id="color_hero_btn2_text" class="form-input color-input" value="<%= site.hero_btn2_text || '#ffffff' %>">
+          </div>
+        </div>
+      </div>
+      <p class="form-help" style="font-size:12px;color:#888;margin-top:8px;">💡 টাইটেল গোল্ড শিমার ইফেক্ট চাইলে Title Color-এ <code>#c4975a</code> দিন, অথবা সাদা রাখুন।</p>
+    </div>
+
     <button type="submit" class="btn btn-primary" style="font-size:16px;padding:14px 40px;"><i class="fas fa-check"></i> Save Hero Section</button>
   </form>
 </div>

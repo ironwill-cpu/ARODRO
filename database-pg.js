@@ -102,7 +102,14 @@ async function initDb() {
       ['hero_position', 'middle', 'select', 'hero'],  // top | middle | bottom
       ['hero_size', 'medium', 'select', 'hero'],      // small | medium | large
       ['hero_overlay', '25', 'number', 'hero'],       // 0-80 darkness %
-      ['hero_title_size', 'large', 'select', 'hero']  // small | medium | large
+      ['hero_title_size', 'large', 'select', 'hero'],  // small | medium | large
+      ['hero_title_color', '#ffffff', 'color', 'hero'],      // title text color
+      ['hero_subtitle_color', '#ffffff', 'color', 'hero'],   // subtitle text color
+      ['hero_desc_color', '#ffffff', 'color', 'hero'],       // description text color
+      ['hero_btn1_bg', '#c4975a', 'color', 'hero'],          // button 1 background
+      ['hero_btn1_text', '#ffffff', 'color', 'hero'],        // button 1 text
+      ['hero_btn2_bg', 'transparent', 'color', 'hero'],      // button 2 background
+      ['hero_btn2_text', '#ffffff', 'color', 'hero']         // button 2 text
     ];
     for (const [key, val, type, grp] of heroDefaults) {
       await p.query('INSERT INTO site_settings (key, value, type, group_name) VALUES ($1,$2,$3,$4) ON CONFLICT (key) DO NOTHING', [key, val, type, grp]);
