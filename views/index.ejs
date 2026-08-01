@@ -1,83 +1,18 @@
-<!-- Hero Section (Auto-Slider) -->
-<%
-  // Compute dynamic hero styles from admin settings
-  const heroAlign = (site.hero_align || 'left');
-  const heroPos = (site.hero_position || 'middle');
-  const heroSize = (site.hero_size || 'medium');
-  const overlay = parseInt(site.hero_overlay || 25, 10);
-  const tSize = (site.hero_title_size || 'large');
-
-  const heroContentStyle = heroAlign === 'center' ? 'text-align:center;align-items:center;' :
-    (heroAlign === 'right' ? 'text-align:right;align-items:flex-end;margin-left:auto;' : 'text-align:left;align-items:flex-start;');
-  const heroSlidePad = heroSize === 'small' ? 'padding:50px 0 70px;' :
-    (heroSize === 'large' ? 'padding:90px 0 120px;' : 'padding:70px 0 90px;');
-  // Vertical position: top/middle/bottom of the hero area (flex column via align-items)
-  const heroJustify = heroPos === 'top' ? 'align-items:flex-start;' :
-    (heroPos === 'bottom' ? 'align-items:flex-end;' : 'align-items:center;');
-  const heroTitleSize = tSize === 'small' ? 'font-size:48px;' :
-    (tSize === 'medium' ? 'font-size:60px;' : 'font-size:72px;');
-  const heroActionsStyle = heroAlign === 'center' ? 'justify-content:center;' :
-    (heroAlign === 'right' ? 'justify-content:flex-end;' : '');
-%>
-<section class="hero" id="heroSlider">
-  <div class="hero-slides">
-    <!-- Slide 1: Main (admin settings) -->
-    <div class="hero-slide active" style="<%= site.hero_image ? 'background:linear-gradient(rgba(30,6,6,' + (overlay/100) + '),rgba(30,6,6,' + (overlay/100) + ')),url(' + site.hero_image + ') center/cover no-repeat;' : '' %><%= heroSlidePad %><%= heroJustify %>">
-      <div class="hero-bg"></div>
-      <div class="container">
-        <div class="hero-content" style="<%= heroContentStyle %>">
-          <span class="hero-subtitle">✦ Welcome to <%= site.site_name || 'ARODRO' %> ✦</span>
-          <h1 class="hero-title luxury-title" style="<%= heroTitleSize %>"><%= site.hero_title || 'Radiate Your<br>Natural Beauty' %></h1>
-          <p class="hero-desc"><%= site.hero_subtitle || 'Discover premium cosmetics crafted for every skin tone. Luxury beauty, redefined.' %></p>
-          <div class="hero-actions" style="<%= heroActionsStyle %>">
-            <a href="<%= site.hero_button_link || '/category/skincare' %>" class="btn btn-primary"><i class="fas fa-shopping-bag"></i> <%= site.hero_button_text || 'Shop Now' %></a>
-            <a href="#featured" class="btn btn-outline"><i class="fas fa-compass"></i> Explore Collection</a>
-          </div>
-        </div>
+<!-- Hero Section -->
+<section class="hero" style="<%= site.hero_image ? 'background:linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3)),url(' + site.hero_image + ') center/cover no-repeat;' : '' %>">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-content">
+      <span class="hero-subtitle">Welcome to <%= site.site_name || 'ARODRO' %></span>
+      <h1 class="hero-title"><%= site.hero_title || 'Where Beauty<br>Meets Elegance' %></h1>
+      <p class="hero-desc"><%= site.hero_subtitle || 'Discover premium cosmetics crafted for the modern you. From radiant skincare to captivating fragrances.' %></p>
+      <div class="hero-actions">
+        <a href="<%= site.hero_button_link || '/category/skincare' %>" class="btn btn-primary"><%= site.hero_button_text || 'Shop Now' %></a>
+        <a href="#featured" class="btn btn-outline">Explore Collection</a>
       </div>
     </div>
-
-    <!-- Slide 2: New Arrivals -->
-    <div class="hero-slide" style="background:linear-gradient(135deg, #4a1010 0%, #6b1e1e 40%, #8a2e2e 70%, #a63737 100%);<%= heroSlidePad %><%= heroJustify %>">
-      <div class="hero-bg"></div>
-      <div class="container">
-        <div class="hero-content" style="<%= heroContentStyle %>">
-          <span class="hero-subtitle">✦ Fresh From The Lab ✦</span>
-          <h1 class="hero-title luxury-title" style="<%= heroTitleSize %>">New Arrivals<br>Just Dropped</h1>
-          <p class="hero-desc">Be the first to try our latest skincare and makeup innovations. Glow like never before.</p>
-          <div class="hero-actions" style="<%= heroActionsStyle %>">
-            <a href="/category/makeup" class="btn btn-primary"><i class="fas fa-shopping-bag"></i> Shop New</a>
-            <a href="#featured" class="btn btn-outline"><i class="fas fa-star"></i> Best Sellers</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Slide 3: Sale -->
-    <div class="hero-slide" style="background:linear-gradient(135deg, #3d0f0f 0%, #7a2626 45%, #c4975a 130%);<%= heroSlidePad %><%= heroJustify %>">
-      <div class="hero-bg"></div>
-      <div class="container">
-        <div class="hero-content" style="<%= heroContentStyle %>">
-          <span class="hero-subtitle">✦ Limited Time ✦</span>
-          <h1 class="hero-title luxury-title" style="<%= heroTitleSize %>">Mega Beauty Sale<br>Up To 40% Off</h1>
-          <p class="hero-desc">Treat yourself to luxury at an unbeatable price. Offer ends soon — don't miss out!</p>
-          <div class="hero-actions" style="<%= heroActionsStyle %>">
-            <a href="/category/skincare" class="btn btn-primary"><i class="fas fa-fire"></i> Grab The Deal</a>
-            <a href="#featured" class="btn btn-outline"><i class="fas fa-arrow-right"></i> View All</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Slider Dots -->
-  <div class="hero-dots">
-    <button class="hero-dot active" data-slide="0" aria-label="Slide 1"></button>
-    <button class="hero-dot" data-slide="1" aria-label="Slide 2"></button>
-    <button class="hero-dot" data-slide="2" aria-label="Slide 3"></button>
   </div>
 </section>
-
 
 <!-- Categories Section -->
 <section class="section categories-section">
