@@ -224,13 +224,13 @@
         <% related.forEach(product => { %>
           <div class="product-card">
             <div class="product-image">
-              <div class="product-placeholder" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
-                <% if (product.image) { %>
-                  <img src="<%= product.image %>" alt="<%= product.name %>" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
+              <% if (product.image) { %>
+                  <img src="<%= product.image %>" alt="<%= product.name %>">
                 <% } else { %>
-                  <i class="fas fa-gem"></i>
+                  <div class="product-placeholder" style="background: linear-gradient(135deg, #e8c4c4, #d4a85333);">
+                    <i class="fas fa-gem"></i>
+                  </div>
                 <% } %>
-              </div>
               <% if (product.compare_price) { %>
                 <span class="product-badge sale">Sale</span>
               <% } %>
