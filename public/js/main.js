@@ -33,6 +33,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // Mobile Menu Toggle
   const menuToggle = document.getElementById('menuToggle');
   const mainNav = document.getElementById('mainNav');
+
+  // Shop link → smooth scroll to category section on homepage
+  document.querySelectorAll('.shop-scroll-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const targetId = this.getAttribute('href').split('#')[1];
+      if (!targetId) return;
+      // If we're already on the homepage, scroll smoothly
+      if (window.location.pathname === '/' || window.location.pathname === '') {
+        e.preventDefault();
+        mainNav.classList.remove('active');
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+      // Otherwise let the browser navigate to /#cat-... (hash will be handled on load)
+    });
+  });
   
   if (menuToggle && mainNav) {
     menuToggle.addEventListener('click', function(e) {

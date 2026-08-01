@@ -97,7 +97,7 @@
   <% Object.entries(categoryProducts).forEach(([slug, products]) => { %>
     <% if (products.length > 0) { %>
       <% const cat = categories.find(c => c.slug === slug); %>
-      <section class="section category-products-section">
+      <section class="section category-products-section" id="cat-<%= slug %>">
         <div class="container">
           <div class="section-header">
             <span class="section-label"><%= cat ? cat.name : '' %></span>
