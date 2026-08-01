@@ -502,6 +502,63 @@ img { max-width: 100%; height: auto; }
   background: rgba(255,255,255,0.15);
 }
 
+/* ===== Watercolor buttons ===== */
+.btn-watercolor {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(232,196,196,0.9), transparent 55%),
+    radial-gradient(circle at 85% 25%, rgba(196,151,90,0.85), transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(166,55,55,0.75), transparent 60%),
+    linear-gradient(135deg, #a63737, #c4975a);
+  background-size: 220% 220%, 220% 220%, 220% 220%, 100% 100%;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.35);
+  animation: waterflow 7s ease-in-out infinite;
+  box-shadow: 0 4px 18px rgba(166,55,55,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.btn-watercolor:hover {
+  box-shadow: 0 8px 28px rgba(166,55,55,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+  transform: translateY(-2px);
+}
+
+/* Watercolor outline button (Explore) */
+.btn-watercolor-outline {
+  border: 2px solid transparent;
+  color: #fff !important;
+  background:
+    linear-gradient(#7a2626, #7a2626) padding-box,
+    radial-gradient(circle at 20% 30%, #e8c4c4, transparent 60%),
+    radial-gradient(circle at 80% 70%, #c4975a, transparent 55%),
+    linear-gradient(135deg, #e8c4c4, #c4975a) border-box;
+  background-size: 100% 100%, 220% 220%, 220% 220%, 100% 100%;
+  border-radius: 50px;
+  animation: waterflowOutline 6s ease-in-out infinite;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+.btn-watercolor-outline:hover {
+  background:
+    linear-gradient(rgba(122,38,38,0.7), rgba(122,38,38,0.7)) padding-box,
+    radial-gradient(circle at 20% 30%, #e8c4c4, transparent 60%),
+    radial-gradient(circle at 80% 70%, #c4975a, transparent 55%),
+    linear-gradient(135deg, #e8c4c4, #c4975a) border-box;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* Slow flowing watercolor animation */
+@keyframes waterflow {
+  0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 0 0; }
+  50%  { background-position: 100% 50%, 0% 100%, 0% 0%, 0 0; }
+  100% { background-position: 0% 0%, 100% 0%, 50% 100%, 0 0; }
+}
+
+@keyframes waterflowOutline {
+  0%   { background-position: 0 0, 0% 0%, 100% 100%, 0 0; }
+  50%  { background-position: 0 0, 100% 100%, 0% 0%, 0 0; }
+  100% { background-position: 0 0, 0% 0%, 100% 100%, 0 0; }
+}
+
 /* Section */
 .section { padding: 80px 0; }
 
