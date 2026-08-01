@@ -441,12 +441,12 @@ img { max-width: 100%; height: auto; }
 
 /* Luxury animated gold title: shimmer + gentle left-right slide */
 .luxury-animated {
-  background: linear-gradient(120deg, #f8e7c0 0%, #c4975a 25%, #ffd98e 50%, #c4975a 75%, #f8e7c0 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  background: linear-gradient(120deg, #f8e7c0 0%, #c4975a 25%, #ffd98e 50%, #c4975a 75%, #f8e7c0 100%) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
   letter-spacing: 4px;
   animation: goldShimmer 3.5s linear infinite, titleSlide 6s ease-in-out infinite;
   filter: drop-shadow(0 2px 8px rgba(196,151,90,0.45));
