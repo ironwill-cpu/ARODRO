@@ -439,6 +439,40 @@ img { max-width: 100%; height: auto; }
   margin: 16px 0;
 }
 
+/* Luxury animated gold title: shimmer + gentle left-right slide */
+.luxury-animated {
+  background: linear-gradient(120deg, #f8e7c0 0%, #c4975a 25%, #ffd98e 50%, #c4975a 75%, #f8e7c0 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  letter-spacing: 4px;
+  animation: goldShimmer 3.5s linear infinite, titleSlide 6s ease-in-out infinite;
+  filter: drop-shadow(0 2px 8px rgba(196,151,90,0.45));
+  display: inline-block;
+}
+
+@keyframes goldShimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes titleSlide {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(48px); }
+}
+
+@keyframes titleSlideMobile {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(22px); }
+}
+
+.hero-subtitle {
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
 .hero-desc {
   font-size: 17px;
   color: var(--color-white);
@@ -1584,6 +1618,7 @@ img { max-width: 100%; height: auto; }
   
   .hero { padding: 45px 0; min-height: auto; }
   .hero-title { font-size: 42px; margin: 14px 0; }
+  .luxury-animated { letter-spacing: 2px; animation: goldShimmer 3.5s linear infinite, titleSlideMobile 6s ease-in-out infinite; }
   .hero-desc { margin-bottom: 24px; }
   .hero-actions { flex-direction: row; flex-wrap: wrap; gap: 10px; }
 
