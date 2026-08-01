@@ -359,6 +359,37 @@ router.get('/settings', async (req, res) => {
   });
 });
 
+// Admin: Hero Section Editor
+router.get('/hero', async (req, res) => {
+  if (!req.session.admin) return res.redirect('/admin/login');
+  const settings = await db.getAllSettings();
+  const site = {};
+  settings.forEach(s => { site[s.key] = s.value; });
+  res.render('admin/hero', {
+    title: 'Hero Editor — ARODRO Admin',
+    site,
+    cartCount: 0,
+    message: req.query.saved ? '✅ Hero section updated! Changes are live on the website.' : null
+  });
+});
+
+// Save hero settings
+router.post('/hero/update', async (req, res) => {
+  if (!req.session.admin) return res.status(401).json({ success: false });
+  try {
+    const keys = ['hero_image', 'hero_title', 'hero_subtitle', 'hero_button_text', 'hero_button_link',
+                  'hero_align', 'hero_position', 'hero_size', 'hero_overlay', 'hero_title_size'];
+    for (const key of keys) {
+      if (req.body[key] !== undefined) {
+        await db.updateSetting(key, req.body[key]);
+      }
+    }
+    res.redirect('/admin/hero?saved=1');
+  } catch (err) {
+    res.status(500).send('Error: ' + err.message);
+  }
+});
+
 // Batch update settings
 router.post('/settings/update', async (req, res) => {
   if (!req.session.admin) return res.status(401).json({ success: false });

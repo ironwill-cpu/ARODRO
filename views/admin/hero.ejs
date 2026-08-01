@@ -1,0 +1,148 @@
+<!-- Admin Hero Editor Page -->
+<div class="admin-page">
+  <div class="admin-header">
+    <h1><i class="fas fa-image"></i> Hero Section Editor</h1>
+    <a href="/" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i> View Live Site</a>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert alert-success"><%= message %></div>
+  <% } %>
+
+  <form method="POST" action="/admin/hero/update">
+
+    <!-- 1. Hero Image -->
+    <div class="admin-card" style="margin-bottom:20px;">
+      <h3 style="margin-bottom:16px;">🖼️ Hero Background Photo</h3>
+      <div class="hero-image-edit">
+        <div class="image-preview" id="heroPreview" style="width:100%;height:180px;border-radius:12px;background-size:cover;background-position:center;border:2px dashed #ddd;margin-bottom:12px;
+          background-image:url('<%= site.hero_image || '' %>');
+          background-color:#5c1a1a;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <input type="file" id="heroImageFile" accept="image/*" class="form-input" style="flex:1;">
+          <input type="hidden" name="hero_image" id="heroImageInput" value="<%= site.hero_image || '' %>">
+          <button type="button" class="btn btn-primary" onclick="uploadHeroImage()"><i class="fas fa-upload"></i> Upload</button>
+        </div>
+        <p class="form-help" style="font-size:12px;color:#888;margin-top:8px;">JPG/PNG recommended — large &amp; clear photos look best. Changes apply instantly.</p>
+      </div>
+    </div>
+
+    <!-- 2. Hero Text -->
+    <div class="admin-card" style="margin-bottom:20px;">
+      <h3 style="margin-bottom:16px;">📝 Hero Text</h3>
+      <div class="hero-form-grid">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="setting-label">Title (বড় লেখা)</label>
+          <input type="text" name="hero_title" class="form-input" value="<%= site.hero_title || 'Radiate Your<br>Natural Beauty' %>">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="setting-label">Description (টাইটেলের নিচের লেখা)</label>
+          <textarea name="hero_subtitle" class="form-input" rows="2"><%= site.hero_subtitle || 'Discover premium cosmetics crafted for every skin tone. Luxury beauty, redefined.' %></textarea>
+        </div>
+        <div class="form-group">
+          <label class="setting-label">Button 1 Text</label>
+          <input type="text" name="hero_button_text" class="form-input" value="<%= site.hero_button_text || 'Shop Now' %>">
+        </div>
+        <div class="form-group">
+          <label class="setting-label">Button 1 Link</label>
+          <input type="text" name="hero_button_link" class="form-input" value="<%= site.hero_button_link || '/category/skincare' %>">
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Layout Controls -->
+    <div class="admin-card" style="margin-bottom:20px;">
+      <h3 style="margin-bottom:16px;">🎛️ Layout Controls</h3>
+      <div class="hero-form-grid">
+
+        <div class="form-group">
+          <label class="setting-label">Text Position (উপরে / মাঝে / নিচে)</label>
+          <div class="btn-group" data-field="hero_position">
+            <button type="button" class="seg-btn <%= site.hero_position === 'top' ? 'active' : '' %>" data-value="top">⬆️ Top</button>
+            <button type="button" class="seg-btn <%= site.hero_position === 'middle' ? 'active' : '' %>" data-value="middle">➖ Middle</button>
+            <button type="button" class="seg-btn <%= site.hero_position === 'bottom' ? 'active' : '' %>" data-value="bottom">⬇️ Bottom</button>
+          </div>
+          <input type="hidden" name="hero_position" value="<%= site.hero_position || 'middle' %>">
+        </div>
+
+        <div class="form-group">
+          <label class="setting-label">Text Alignment (বাম / মাঝ / ডান)</label>
+          <div class="btn-group" data-field="hero_align">
+            <button type="button" class="seg-btn <%= site.hero_align === 'left' ? 'active' : '' %>" data-value="left">⬅️ Left</button>
+            <button type="button" class="seg-btn <%= site.hero_align === 'center' ? 'active' : '' %>" data-value="center">➡️ Center</button>
+            <button type="button" class="seg-btn <%= site.hero_align === 'right' ? 'active' : '' %>" data-value="right">➡️ Right</button>
+          </div>
+          <input type="hidden" name="hero_align" value="<%= site.hero_align || 'left' %>">
+        </div>
+
+        <div class="form-group">
+          <label class="setting-label">Hero Section Size (ছোট / মাঝারি / বড়)</label>
+          <div class="btn-group" data-field="hero_size">
+            <button type="button" class="seg-btn <%= site.hero_size === 'small' ? 'active' : '' %>" data-value="small">🔹 Small</button>
+            <button type="button" class="seg-btn <%= site.hero_size === 'medium' ? 'active' : '' %>" data-value="medium">🔶 Medium</button>
+            <button type="button" class="seg-btn <%= site.hero_size === 'large' ? 'active' : '' %>" data-value="large">🔷 Large</button>
+          </div>
+          <input type="hidden" name="hero_size" value="<%= site.hero_size || 'medium' %>">
+        </div>
+
+        <div class="form-group">
+          <label class="setting-label">Title Size (ছোট / মাঝারি / বড়)</label>
+          <div class="btn-group" data-field="hero_title_size">
+            <button type="button" class="seg-btn <%= site.hero_title_size === 'small' ? 'active' : '' %>" data-value="small">🔹 Small</button>
+            <button type="button" class="seg-btn <%= site.hero_title_size === 'medium' ? 'active' : '' %>" data-value="medium">🔶 Medium</button>
+            <button type="button" class="seg-btn <%= site.hero_title_size === 'large' ? 'active' : '' %>" data-value="large">🔷 Large</button>
+          </div>
+          <input type="hidden" name="hero_title_size" value="<%= site.hero_title_size || 'large' %>">
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="setting-label">Photo Darkness (ছবির উপর কালো ভাব — লেখা স্পষ্ট করতে) — <%= site.hero_overlay || 25 %>%</label>
+          <input type="range" name="hero_overlay" min="0" max="80" value="<%= site.hero_overlay || 25 %>" class="hero-overlay-range" oninput="this.previousElementSibling.style.display='none';document.getElementById('overlayVal').textContent=this.value+'%';">
+          <span id="overlayVal" style="font-weight:600;color:#a63737;"><%= site.hero_overlay || 25 %>%</span>
+        </div>
+
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="font-size:16px;padding:14px 40px;"><i class="fas fa-check"></i> Save Hero Section</button>
+  </form>
+</div>
+
+<script>
+// Segment button groups → hidden input
+document.querySelectorAll('.btn-group').forEach(group => {
+  group.querySelectorAll('.seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      group.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const input = group.parentElement.querySelector('input[type="hidden"]');
+      if (input) input.value = btn.dataset.value;
+    });
+  });
+});
+
+// Upload hero image
+function uploadHeroImage() {
+  const file = document.getElementById('heroImageFile').files[0];
+  if (!file) { alert('প্রথমে একটা ছবি বাছুন!'); return; }
+  const fd = new FormData();
+  fd.append('image', file);
+  fd.append('setting_key', 'hero_image');
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+  fetch('/admin/settings/upload-image', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        document.getElementById('heroImageInput').value = res.url;
+        document.getElementById('heroPreview').style.backgroundImage = "url('" + res.url + "')";
+        alert('✅ Photo uploaded! Save the form to apply.');
+      } else {
+        alert('Upload failed: ' + (res.message || 'Unknown error'));
+      }
+    })
+    .catch(e => alert('Upload error: ' + e.message))
+    .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-upload"></i> Upload'; });
+}
+</script>

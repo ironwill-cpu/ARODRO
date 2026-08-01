@@ -95,6 +95,23 @@ async function initDb() {
     console.log('  Migration note:', e.message.substring(0,80));
   }
 
+  // Auto-seed hero editor settings (idempotent)
+  try {
+    const heroDefaults = [
+      ['hero_align', 'left', 'select', 'hero'],       // left | center | right
+      ['hero_position', 'middle', 'select', 'hero'],  // top | middle | bottom
+      ['hero_size', 'medium', 'select', 'hero'],      // small | medium | large
+      ['hero_overlay', '25', 'number', 'hero'],       // 0-80 darkness %
+      ['hero_title_size', 'large', 'select', 'hero']  // small | medium | large
+    ];
+    for (const [key, val, type, grp] of heroDefaults) {
+      await p.query('INSERT INTO site_settings (key, value, type, group_name) VALUES ($1,$2,$3,$4) ON CONFLICT (key) DO NOTHING', [key, val, type, grp]);
+    }
+    console.log('✓ Hero editor settings seeded');
+  } catch(e) {
+    console.log('  Hero seed note:', e.message.substring(0,80));
+  }
+
   // Auto-fix: sync SERIAL sequences so new rows never conflict with existing IDs
   try {
     const tables = ['products', 'categories', 'orders', 'coupons', 'reviews', 'wishlists', 'product_variants'];

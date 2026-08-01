@@ -407,6 +407,51 @@ input[type="color"].form-control { height: 44px; padding: 4px; }
 .badge-danger { background: #ffebee; color: #c62828; }
 .badge-info { background: #e3f2fd; color: #1565c0; }
 
+/* === HERO EDITOR PAGE === */
+.hero-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.seg-btn {
+  flex: 1;
+  min-width: 90px;
+  padding: 10px 12px;
+  border: 2px solid #e8d5c9;
+  border-radius: 10px;
+  background: #fff;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.seg-btn:hover { border-color: #a63737; color: #a63737; }
+
+.seg-btn.active {
+  background: linear-gradient(135deg, #a63737, #c05050);
+  color: #fff;
+  border-color: #a63737;
+  box-shadow: 0 3px 10px rgba(166,55,55,0.35);
+}
+
+.hero-overlay-range {
+  width: 100%;
+  accent-color: #a63737;
+  height: 8px;
+  margin-bottom: 4px;
+}
+
+.form-help { color: #888; font-size: 12px; }
+
 /* === SETTINGS PAGE === */
 .settings-grid {
   display: grid;
