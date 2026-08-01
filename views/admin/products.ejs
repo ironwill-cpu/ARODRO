@@ -35,7 +35,14 @@
               <td><%= product.category_name || '—' %></td>
               <td>৳<%= Number(product.price).toLocaleString() %></td>
               <td><%= product.stock %></td>
-              <td><%= product.featured ? '⭐' : '—' %></td>
+              <td>
+                <button class="featured-toggle <%= product.featured ? 'active' : '' %>" 
+                  data-id="<%= product.id %>" 
+                  title="<%= product.featured ? 'Remove from Best Sellers' : 'Add to Best Sellers' %>"
+                  onclick="toggleFeatured(<%= product.id %>, this)">
+                  <i class="fas fa-star"></i>
+                </button>
+              </td>
               <td style="white-space:nowrap">
                 <a href="/admin/products/edit/<%= product.id %>" class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></a>
                 <form action="/admin/products/delete/<%= product.id %>" method="POST" style="display:inline" onsubmit="return confirm('Delete this product?')">
@@ -56,3 +63,35 @@
     </div>
   <% } %>
 </div>
+
+<style>
+.featured-toggle {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ccc;
+  transition: all 0.2s;
+  padding: 4px 8px;
+}
+.featured-toggle:hover { color: #c4975a; transform: scale(1.15); }
+.featured-toggle.active { color: #c4975a; }
+.featured-toggle.active:hover { color: #e53935; }
+</style>
+
+<script>
+function toggleFeatured(id, btn) {
+  fetch('/admin/products/toggle-featured/' + id, { method: 'POST' })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        btn.classList.toggle('active', res.featured);
+        btn.title = res.featured ? 'Remove from Best Sellers' : 'Add to Best Sellers';
+        showToast(res.featured ? '⭐ Added to Best Sellers!' : 'Removed from Best Sellers');
+      } else {
+        alert('Error: ' + (res.message || 'Unknown'));
+      }
+    })
+    .catch(e => alert('Error: ' + e.message));
+}
+</script>

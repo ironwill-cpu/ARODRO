@@ -392,6 +392,19 @@ router.post('/hero/update', async (req, res) => {
   }
 });
 
+router.post('/products/toggle-featured/:id', async (req, res) => {
+  try {
+    const product = await db.getProductById(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    const newVal = product.featured ? 0 : 1;
+    await db.updateProduct(product.id, { featured: newVal });
+    res.json({ success: true, featured: !!newVal });
+  } catch (err) {
+    console.error('Toggle featured error:', err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Batch update settings
 router.post('/settings/update', async (req, res) => {
   if (!req.session.admin) return res.status(401).json({ success: false });
