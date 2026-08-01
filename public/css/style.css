@@ -523,27 +523,21 @@ img { max-width: 100%; height: auto; }
 
 /* Watercolor outline button (Explore) */
 .btn-watercolor-outline {
-  border: 2px solid transparent !important;
+  border: 2px solid rgba(255,255,255,0.8) !important;
   color: #fff !important;
-  background:
-    linear-gradient(#7a2626, #7a2626) padding-box,
-    radial-gradient(circle at 20% 30%, #e8c4c4, transparent 60%),
-    radial-gradient(circle at 80% 70%, #c4975a, transparent 55%),
-    linear-gradient(135deg, #e8c4c4, #c4975a) border-box !important;
-  background-size: 100% 100%, 220% 220%, 220% 220%, 100% 100% !important;
+  background: rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border-radius: 50px !important;
-  animation: waterflowOutline 6s ease-in-out infinite;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  transition: var(--transition);
 }
 
 .btn-watercolor-outline:hover {
-  background:
-    linear-gradient(rgba(122,38,38,0.7), rgba(122,38,38,0.7)) padding-box,
-    radial-gradient(circle at 20% 30%, #e8c4c4, transparent 60%),
-    radial-gradient(circle at 80% 70%, #c4975a, transparent 55%),
-    linear-gradient(135deg, #e8c4c4, #c4975a) border-box !important;
+  background: rgba(255,255,255,0.18) !important;
+  border-color: #fff !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
 /* Slow flowing watercolor animation */
