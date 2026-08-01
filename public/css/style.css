@@ -285,7 +285,7 @@ img { max-width: 100%; height: auto; }
 .hero-slide {
   position: relative;
   display: none;
-  padding: 40px 0 60px;
+  padding: 70px 0 90px;
   background: linear-gradient(135deg, #5c1a1a 0%, #7a2626 30%, #a63737 60%, #8a2e2e 100%);
   align-items: center;
 }
