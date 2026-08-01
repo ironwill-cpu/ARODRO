@@ -1,0 +1,19 @@
+name: Keep Render Awake
+
+on:
+  schedule:
+    # Every 5 minutes — keeps Render free tier from sleeping
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}   # allow manual run too
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Visit website
+        run: |
+          curl -s -o /dev/null -w "Home: %{http_code} (%{time_total}s)\n" https://arodro.onrender.com/
+          curl -s -o /dev/null -w "Admin: %{http_code} (%{time_total}s)\n" https://arodro.onrender.com/admin
+      - name: Visit API health
+        run: |
+          curl -s -o /dev/null -w "Upload test: %{http_code}\n" https://arodro.onrender.com/upload/test
