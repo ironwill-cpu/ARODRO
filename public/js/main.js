@@ -2,7 +2,34 @@
 
 document.addEventListener('DOMContentLoaded', function() {
 
-  
+  // Dark / Light Mode Toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const savedTheme = localStorage.getItem('arodro_theme');
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('arodro_theme', theme);
+    if (themeIcon) {
+      themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+  }
+
+  // Apply saved theme on load (before paint if possible)
+  if (savedTheme === 'dark') {
+    applyTheme('dark');
+  } else if (savedTheme === 'light') {
+    applyTheme('light');
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  // Hero Auto-Slider
   // Mobile Menu Toggle
   const menuToggle = document.getElementById('menuToggle');
   const mainNav = document.getElementById('mainNav');

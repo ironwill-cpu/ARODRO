@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= typeof title !== 'undefined' ? title : (site.site_name || 'ARODRO') %></title>
+  <script>
+    // Apply saved theme before first paint (prevents flash)
+    (function() {
+      try {
+        var t = localStorage.getItem('arodro_theme');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      } catch(e) {}
+    })();
+  </script>
   <% if (site && site.favicon_url) { %>
     <link rel="icon" type="image/x-icon" href="<%= site.favicon_url %>">
   <% } %>
@@ -69,6 +78,9 @@
         </nav>
 
         <div class="header-actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Dark mode">
+            <i class="fas fa-moon" id="themeIcon"></i>
+          </button>
           <button class="icon-btn" id="searchToggle" aria-label="Search">
             <i class="fas fa-search"></i>
           </button>
