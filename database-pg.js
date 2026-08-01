@@ -173,7 +173,11 @@ async function getProductById(id) {
 async function createProduct(data) {
   const r = await query(
     'INSERT INTO products (name, slug, short_description, description, price, compare_price, category_id, image, images, stock, featured, active, ingredients, weight) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id',
-    [data.name, data.slug, data.short_description, data.description, data.price, data.compare_price || null, data.category_id, data.image, data.images, data.stock || 10, data.featured || 0, data.active || 1, data.ingredients || null, data.weight || null]
+    [data.name, data.slug, data.short_description, data.description,
+     cleanNum(data.price, 0), cleanNum(data.compare_price, null),
+     cleanInt(data.category_id, null), data.image, data.images,
+     cleanInt(data.stock, 10), data.featured ? 1 : 0, data.active === 0 || data.active === '0' ? 0 : 1,
+     data.ingredients || null, data.weight || null]
   );
   return r.rows[0].id;
 }
@@ -186,13 +190,34 @@ async function updateProduct(id, data) {
     console.log('updateProduct: no fields to update');
     return;
   }
+  // Sanitize numeric fields so empty strings never hit numeric columns
+  const values = presentFields.map(f => {
+    let v = data[f];
+    if (f === 'price') return cleanNum(v, 0);
+    if (f === 'compare_price') return cleanNum(v, null);
+    if (f === 'category_id') return cleanInt(v, null);
+    if (f === 'stock') return cleanInt(v, 0);
+    if (f === 'featured' || f === 'active') return (v === true || v === 1 || v === '1' || v === 'true') ? 1 : 0;
+    return v;
+  });
   // Build SET clause with numbered params (starting at $2)
   const setClauses = presentFields.map((f, i) => `${f} = $${i + 2}`);
-  const values = presentFields.map(f => data[f]);
   const sql = `UPDATE products SET ${setClauses.join(', ')} WHERE id = $1`;
   console.log('updateProduct SQL:', sql);
   console.log('updateProduct params:', [id, ...values.map(v => typeof v === 'string' ? v.substring(0,50) : v)]);
   await query(sql, [id, ...values]);
+}
+
+// Helpers: turn empty/invalid values into safe numbers
+function cleanNum(v, fallback) {
+  if (v === null || v === undefined || v === '') return fallback;
+  const n = parseFloat(v);
+  return isNaN(n) ? fallback : n;
+}
+function cleanInt(v, fallback) {
+  if (v === null || v === undefined || v === '') return fallback;
+  const n = parseInt(v, 10);
+  return isNaN(n) ? fallback : n;
 }
 
 async function deleteProduct(id) {
