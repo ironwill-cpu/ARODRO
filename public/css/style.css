@@ -302,7 +302,7 @@ img { max-width: 100%; height: auto; }
 
 /* Hero content: text sits higher */
 .hero-content {
-  padding-top: 40px;
+  padding-top: 80px;
 }
 
 /* Text shadows so text stays readable over photo */
@@ -447,7 +447,7 @@ img { max-width: 100%; height: auto; }
   margin-bottom: 32px;
 }
 
-.hero-actions { display: flex; gap: 12px; margin-top: 46px; }
+.hero-actions { display: flex; gap: 12px; margin-top: 80px; }
 
 .hero .btn-primary,
 .hero .btn-outline {
