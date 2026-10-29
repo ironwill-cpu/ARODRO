@@ -276,6 +276,16 @@ module.exports = {
     if (dbModule && dbModule.query) return dbModule.query(...args);
     throw new Error('Database not initialized');
   },
+  getDb: async () => {
+    if (typeof initSqliteDb === 'function') {
+      try {
+        return await initSqliteDb();
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  },
   getProducts: proxy('getProducts'),
   getProduct: proxy('getProduct'),
   getProductById: proxy('getProductById'),

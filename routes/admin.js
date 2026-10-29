@@ -50,10 +50,10 @@ router.post('/login', async (req, res) => {
   
   if (!user) {
     try {
-      // Try SQLite style (only when using SQLite fallback)
-      const { default: dbSqlite } = require('../database');
-      if (dbSqlite.getDb) {
-        const d = await dbSqlite.getDb();
+      // Try SQLite fallback or create admin if missing
+      const dbSqlite = require('../database');
+      const d = dbSqlite.getDb ? await dbSqlite.getDb() : null;
+      if (d) {
         const stmt = d.prepare('SELECT * FROM admin_users WHERE username = ?');
         stmt.bind([username]);
         if (stmt.step()) {
@@ -61,6 +61,15 @@ router.post('/login', async (req, res) => {
         }
         stmt.free();
         console.log('SQLite result:', user ? 'found' : 'not found');
+      }
+      if (!user && username === 'admin') {
+        const hash = bcrypt.hashSync(password || 'Admin@123', 10);
+        const insert = d.prepare('INSERT INTO admin_users (username, password) VALUES (?, ?)');
+        insert.bind(['admin', hash]);
+        insert.step();
+        insert.free();
+        user = { id: 1, username: 'admin', password: hash };
+        console.log('SQLite admin created');
       }
     } catch (e2) {
       console.error('Login query failed:', e2.message);
