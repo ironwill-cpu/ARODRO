@@ -62,8 +62,140 @@ async function initDb() {
     console.warn('⚠ PostgreSQL unavailable, falling back to SQLite:', err.message);
     dbModule = null;
     usePg = false;
-    return initSqliteInline();
+    const sqliteDb = await initSqliteInline();
+    const sqliteWrapper = {
+      initDb: async () => sqliteDb,
+      query: async (sql, params) => {
+        if (!sqliteDb) throw new Error('SQLite not initialized');
+        return new Promise((resolve, reject) => {
+          try {
+            const stmt = sqliteDb.prepare(sql);
+            if (params && params.length) {
+              stmt.bind(params);
+            }
+            const rows = [];
+            while (stmt.step()) {
+              const row = stmt.getAsObject();
+              rows.push(row);
+            }
+            stmt.free();
+            resolve({ rows });
+          } catch (e) {
+            reject(e);
+          }
+        });
+      },
+      getProducts: () => proxySqliteQuery(sqliteDb, 'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = 1 ORDER BY p.created_at DESC'),
+      getProduct: (slug) => proxySqliteQueryOne(sqliteDb, 'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ? LIMIT 1', [slug]),
+      getProductById: (id) => proxySqliteQueryOne(sqliteDb, 'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ? LIMIT 1', [id]),
+      getCategories: () => proxySqliteQuery(sqliteDb, 'SELECT * FROM categories ORDER BY name'),
+      getCategory: (slug) => proxySqliteQueryOne(sqliteDb, 'SELECT * FROM categories WHERE slug = ? LIMIT 1', [slug]),
+      getOrders: (status) => {
+        let sql = 'SELECT * FROM orders';
+        const params = [];
+        if (status) { sql += ' WHERE order_status = ?'; params.push(status); }
+        sql += ' ORDER BY created_at DESC';
+        return proxySqliteQuery(sqliteDb, sql, params);
+      },
+      getOrder: (orderId) => proxySqliteQueryOne(sqliteDb, 'SELECT * FROM orders WHERE order_id = ? LIMIT 1', [orderId]),
+      createOrder: (data) => proxySqliteInsert(sqliteDb, 'orders', data),
+      updateOrderStatus: (orderId, status) => proxySqliteRun(sqliteDb, 'UPDATE orders SET order_status = ? WHERE order_id = ?', [status, orderId]),
+      updatePaymentStatus: (orderId, status) => proxySqliteRun(sqliteDb, 'UPDATE orders SET payment_status = ? WHERE order_id = ?', [status, orderId]),
+      getDashboardStats: async () => {
+        const orders = await proxySqliteQuery(sqliteDb, "SELECT COUNT(*) as total_orders, SUM(total) as total_revenue, COUNT(CASE WHEN order_status='pending' THEN 1 END) as pending FROM orders");
+        return orders[0] || { total_orders: 0, total_revenue: 0, pending: 0 };
+      },
+      searchProducts: (q) => proxySqliteQuery(sqliteDb, 'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = 1 AND (p.name LIKE ? OR p.description LIKE ?) ORDER BY p.created_at DESC', [`%${q}%`, `%${q}%`]),
+      getProductReviews: (productId) => proxySqliteQuery(sqliteDb, 'SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC', [productId]),
+      addReview: (data) => proxySqliteInsert(sqliteDb, 'reviews', data),
+      getAverageRating: (productId) => proxySqliteQueryOne(sqliteDb, 'SELECT AVG(rating) as avg FROM reviews WHERE product_id = ?', [productId]),
+      getWishlist: (sessionId) => proxySqliteQuery(sqliteDb, 'SELECT p.* FROM wishlists w JOIN products p ON w.product_id = p.id WHERE w.session_id = ?', [sessionId]),
+      toggleWishlist: (productId, sessionId) => {
+        const existing = proxySqliteQueryOne(sqliteDb, 'SELECT id FROM wishlists WHERE product_id = ? AND session_id = ? LIMIT 1', [productId, sessionId]);
+        if (existing) {
+          proxySqliteRun(sqliteDb, 'DELETE FROM wishlists WHERE product_id = ? AND session_id = ?', [productId, sessionId]);
+          return false;
+        } else {
+          proxySqliteInsert(sqliteDb, 'wishlists', { product_id: productId, session_id: sessionId });
+          return true;
+        }
+      },
+      isInWishlist: (productId, sessionId) => !!proxySqliteQueryOne(sqliteDb, 'SELECT id FROM wishlists WHERE product_id = ? AND session_id = ? LIMIT 1', [productId, sessionId]),
+      getWishlistCount: (sessionId) => proxySqliteQueryOne(sqliteDb, 'SELECT COUNT(*) as count FROM wishlists WHERE session_id = ?', [sessionId]),
+      getCouponByCode: (code) => proxySqliteQueryOne(sqliteDb, 'SELECT * FROM coupons WHERE code = ? AND active = 1', [code]),
+      getAllCoupons: () => proxySqliteQuery(sqliteDb, 'SELECT * FROM coupons ORDER BY created_at DESC'),
+      createCoupon: (data) => proxySqliteInsert(sqliteDb, 'coupons', data),
+      incrementCouponUse: (id) => proxySqliteRun(sqliteDb, 'UPDATE coupons SET uses = uses + 1 WHERE id = ?', [id]),
+      deleteCoupon: (id) => proxySqliteRun(sqliteDb, 'DELETE FROM coupons WHERE id = ?', [id]),
+      getProductVariants: (productId) => proxySqliteQuery(sqliteDb, 'SELECT * FROM product_variants WHERE product_id = ?', [productId]),
+      addVariant: (data) => proxySqliteInsert(sqliteDb, 'product_variants', data),
+      deleteVariant: (id) => proxySqliteRun(sqliteDb, 'DELETE FROM product_variants WHERE id = ?', [id]),
+      updateVariantStock: (id, stock) => proxySqliteRun(sqliteDb, 'UPDATE product_variants SET stock = ? WHERE id = ?', [stock, id]),
+      getAllSettings: () => proxySqliteQuery(sqliteDb, 'SELECT * FROM site_settings'),
+      getSetting: (key) => proxySqliteQueryOne(sqliteDb, 'SELECT * FROM site_settings WHERE key = ? LIMIT 1', [key]),
+      updateSetting: (key, value) => proxySqliteRun(sqliteDb, 'UPDATE site_settings SET value = ? WHERE key = ?', [value, key]),
+      createCategory: (data) => proxySqliteInsert(sqliteDb, 'categories', data),
+      updateCategory: (id, data) => proxySqliteUpdate(sqliteDb, 'categories', id, data),
+      deleteCategory: (id) => proxySqliteRun(sqliteDb, 'DELETE FROM categories WHERE id = ?', [id]),
+      createProduct: (data) => proxySqliteInsert(sqliteDb, 'products', data),
+      updateProduct: (id, data) => proxySqliteUpdate(sqliteDb, 'products', id, data),
+      deleteProduct: (id) => proxySqliteRun(sqliteDb, 'DELETE FROM products WHERE id = ?', [id])
+    };
+    dbModule = sqliteWrapper;
+    console.log('✓ Using SQLite fallback');
+    return sqliteDb;
   }
+}
+
+function proxySqliteQuery(db, sql, params) {
+  return new Promise((resolve, reject) => {
+    try {
+      const stmt = db.prepare(sql);
+      if (params && params.length) stmt.bind(params);
+      const rows = [];
+      while (stmt.step()) rows.push(stmt.getAsObject());
+      stmt.free();
+      resolve(rows);
+    } catch (e) { reject(e); }
+  });
+}
+function proxySqliteQueryOne(db, sql, params) {
+  return proxySqliteQuery(db, sql, params).then(rows => rows[0] || null);
+}
+function proxySqliteInsert(db, table, data) {
+  const keys = Object.keys(data);
+  const vals = Object.values(data);
+  const placeholders = keys.map(() => '?').join(',');
+  const sql = `INSERT INTO ${table} (${keys.join(',')}) VALUES (${placeholders})`;
+  return new Promise((resolve, reject) => {
+    try {
+      const stmt = db.prepare(sql);
+      stmt.bind(vals);
+      stmt.step();
+      const info = db.exec("SELECT last_insert_rowid() as id");
+      const id = info[0] && info[0].values[0] ? info[0].values[0][0] : null;
+      stmt.free();
+      resolve({ id });
+    } catch (e) { reject(e); }
+  });
+}
+function proxySqliteUpdate(db, table, id, data) {
+  const keys = Object.keys(data);
+  const vals = Object.values(data);
+  const setClause = keys.map(k => `${k} = ?`).join(', ');
+  const sql = `UPDATE ${table} SET ${setClause} WHERE id = ?`;
+  return proxySqliteRun(db, sql, [...vals, id]);
+}
+function proxySqliteRun(db, sql, params) {
+  return new Promise((resolve, reject) => {
+    try {
+      const stmt = db.prepare(sql);
+      if (params && params.length) stmt.bind(params);
+      stmt.step();
+      stmt.free();
+      resolve({});
+    } catch (e) { reject(e); }
+  });
 }
 
 async function initSqliteDb() {
