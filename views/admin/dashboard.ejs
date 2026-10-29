@@ -23,7 +23,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-icon revenue"><i class="fas fa-taka"></i></div>
-    <div class="stat-value">৳<%= stats.totalRevenue.toLocaleString() %></div>
+    <div class="stat-value">৳<%= (stats.totalRevenue || 0).toLocaleString() %></div>
     <div class="stat-label">Total Revenue</div>
   </div>
 </div>

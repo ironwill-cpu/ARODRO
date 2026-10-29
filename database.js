@@ -104,7 +104,18 @@ async function initDb() {
       updatePaymentStatus: (orderId, status) => proxySqliteRun(sqliteDb, 'UPDATE orders SET payment_status = ? WHERE order_id = ?', [status, orderId]),
       getDashboardStats: async () => {
         const orders = await proxySqliteQuery(sqliteDb, "SELECT COUNT(*) as total_orders, SUM(total) as total_revenue, COUNT(CASE WHEN order_status='pending' THEN 1 END) as pending FROM orders");
-        return orders[0] || { total_orders: 0, total_revenue: 0, pending: 0 };
+        const products = await proxySqliteQuery(sqliteDb, "SELECT COUNT(*) as c FROM products WHERE active=1");
+        const reviews = await proxySqliteQuery(sqliteDb, "SELECT COUNT(*) as c FROM reviews");
+        const recentOrders = await proxySqliteQuery(sqliteDb, "SELECT * FROM orders ORDER BY created_at DESC LIMIT 5");
+        const base = orders[0] || { total_orders: 0, total_revenue: 0, pending: 0 };
+        return {
+          totalProducts: Number(products[0]?.c || 0),
+          totalOrders: Number(base.total_orders || 0),
+          totalReviews: Number(reviews[0]?.c || 0),
+          totalRevenue: Number(base.total_revenue || 0),
+          pendingOrders: Number(base.pending || 0),
+          recentOrders: recentOrders
+        };
       },
       searchProducts: (q) => proxySqliteQuery(sqliteDb, 'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = 1 AND (p.name LIKE ? OR p.description LIKE ?) ORDER BY p.created_at DESC', [`%${q}%`, `%${q}%`]),
       getProductReviews: (productId) => proxySqliteQuery(sqliteDb, 'SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC', [productId]),
