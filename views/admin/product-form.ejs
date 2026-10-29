@@ -156,6 +156,7 @@
       </div>
 
       <button type="submit" class="btn btn-primary btn-lg"><%= product ? 'Update Product' : 'Create Product' %></button>
+      <button type="button" class="btn btn-outline" onclick="debugImageForm()">Debug Image</button>
     </form>
   </div>
 </div>
@@ -709,5 +710,11 @@ document.addEventListener('DOMContentLoaded', function() {
       xhr.send(formData);
     });
   }
+
+  window.debugImageForm = function() {
+    const imageInput = document.getElementById('imageUrl');
+    const nameInput = document.querySelector('input[name="name"]');
+    alert('name=' + (nameInput ? nameInput.value : 'missing') + '\nimage=' + (imageInput ? imageInput.value : 'missing'));
+  };
 });
 </script>
