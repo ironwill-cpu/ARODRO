@@ -111,24 +111,33 @@ router.get('/', async (req, res) => {
 
 // Products management
 router.get('/products', async (req, res) => {
-  const products = await db.getProducts();
-  const categories = await db.getCategories();
-  res.render('admin/products', { 
-    title: 'Products — ARODRO Admin',
-    products, categories,
-    cartCount: 0,
-    layout: 'admin/layout'
-  });
+  try {
+    const [products, categories] = await Promise.all([db.getProducts(), db.getCategories()]);
+    res.render('admin/products', { 
+      title: 'Products — ARODRO Admin',
+      products, categories,
+      cartCount: 0,
+      layout: 'admin/layout'
+    });
+  } catch (err) {
+    console.error('Admin products error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO Admin', categories: [], cartCount: 0, layout: 'admin/layout' });
+  }
 });
 
 router.get('/products/new', async (req, res) => {
-  const categories = await db.getCategories();
-  res.render('admin/product-form', { 
-    title: 'New Product — ARODRO Admin',
-    product: null, categories,
-    cartCount: 0, error: null,
-    layout: 'admin/layout'
-  });
+  try {
+    const categories = await db.getCategories();
+    res.render('admin/product-form', { 
+      title: 'New Product — ARODRO Admin',
+      product: null, categories,
+      cartCount: 0, error: null,
+      layout: 'admin/layout'
+    });
+  } catch (err) {
+    console.error('Admin new product error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO Admin', categories: [], cartCount: 0, layout: 'admin/layout' });
+  }
 });
 
 router.post('/products/new', async (req, res) => {
@@ -268,32 +277,42 @@ router.post('/categories/delete/:id', async (req, res) => {
 
 // Orders management
 router.get('/orders', async (req, res) => {
-  const status = req.query.status || null;
-  const [orders, categories] = await Promise.all([
-    db.getOrders(status),
-    db.getCategories()
-  ]);
-  res.render('admin/orders', { 
-    title: 'Orders — ARODRO Admin',
-    orders, categories,
-    currentStatus: status,
-    cartCount: 0,
-    layout: 'admin/layout'
-  });
+  try {
+    const status = req.query.status || null;
+    const [orders, categories] = await Promise.all([
+      db.getOrders(status),
+      db.getCategories()
+    ]);
+    res.render('admin/orders', { 
+      title: 'Orders — ARODRO Admin',
+      orders, categories,
+      currentStatus: status,
+      cartCount: 0,
+      layout: 'admin/layout'
+    });
+  } catch (err) {
+    console.error('Admin orders error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO Admin', categories: [], cartCount: 0, layout: 'admin/layout' });
+  }
 });
 
 router.get('/orders/:orderId', async (req, res) => {
-  const [order, categories] = await Promise.all([
-    db.getOrder(req.params.orderId),
-    db.getCategories()
-  ]);
-  if (!order) return res.status(404).send('Order not found');
-  res.render('admin/order-detail', { 
-    title: `Order ${order.order_id} — ARODRO Admin`,
-    order, categories,
-    cartCount: 0,
-    layout: 'admin/layout'
-  });
+  try {
+    const [order, categories] = await Promise.all([
+      db.getOrder(req.params.orderId),
+      db.getCategories()
+    ]);
+    if (!order) return res.status(404).render('404', { title: 'Order Not Found', categories, cartCount: 0, layout: 'admin/layout' });
+    res.render('admin/order-detail', { 
+      title: `Order ${order.order_id} — ARODRO Admin`,
+      order, categories,
+      cartCount: 0,
+      layout: 'admin/layout'
+    });
+  } catch (err) {
+    console.error('Admin order detail error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO Admin', categories: [], cartCount: 0, layout: 'admin/layout' });
+  }
 });
 
 router.post('/orders/:orderId/status', async (req, res) => {
@@ -340,37 +359,47 @@ router.delete('/coupons/delete/:id', async (req, res) => {
 // Admin: Settings
 router.get('/settings', async (req, res) => {
   if (!req.session.admin) return res.redirect('/admin/login');
-  const settings = await db.getAllSettings();
-  const categories = await db.getCategories();
-  
-  const groups = {};
-  settings.forEach(s => {
-    if (!groups[s.group_name]) groups[s.group_name] = [];
-    groups[s.group_name].push(s);
-  });
-  
-  res.render('admin/settings', {
-    title: 'Settings — ARODRO Admin',
-    groups, settings,
-    categories,
-    cartCount: 0,
-    admin: req.session.admin,
-    message: req.query.saved ? '✅ All settings saved! Changes are live on the website.' : null
-  });
+  try {
+    const settings = await db.getAllSettings();
+    const categories = await db.getCategories();
+    
+    const groups = {};
+    settings.forEach(s => {
+      if (!groups[s.group_name]) groups[s.group_name] = [];
+      groups[s.group_name].push(s);
+    });
+    
+    res.render('admin/settings', {
+      title: 'Settings — ARODRO Admin',
+      groups, settings,
+      categories,
+      cartCount: 0,
+      admin: req.session.admin,
+      message: req.query.saved ? '✅ All settings saved! Changes are live on the website.' : null
+    });
+  } catch (err) {
+    console.error('Admin settings error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO Admin', categories: [], cartCount: 0, layout: 'admin/layout' });
+  }
 });
 
 // Admin: Hero Section Editor
 router.get('/hero', async (req, res) => {
   if (!req.session.admin) return res.redirect('/admin/login');
-  const settings = await db.getAllSettings();
-  const site = {};
-  settings.forEach(s => { site[s.key] = s.value; });
-  res.render('admin/hero', {
-    title: 'Hero Editor — ARODRO Admin',
-    site,
-    cartCount: 0,
-    message: req.query.saved ? '✅ Hero section updated! Changes are live on the website.' : null
-  });
+  try {
+    const settings = await db.getAllSettings();
+    const site = {};
+    settings.forEach(s => { site[s.key] = s.value; });
+    res.render('admin/hero', {
+      title: 'Hero Editor — ARODRO Admin',
+      site,
+      cartCount: 0,
+      message: req.query.saved ? '✅ Hero section updated! Changes are live on the website.' : null
+    });
+  } catch (err) {
+    console.error('Admin hero error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO Admin', categories: [], cartCount: 0, layout: 'admin/layout' });
+  }
 });
 
 // Save hero settings

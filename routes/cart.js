@@ -4,21 +4,26 @@ const db = require('../database');
 
 // View cart
 router.get('/', async (req, res) => {
-  const categories = await db.getCategories();
-  const cart = req.session.cart || [];
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal >= 1500 ? 0 : 100;
-  const total = subtotal + shipping;
-  
-  res.render('cart', {
-    title: 'Shopping Cart — ARODRO',
-    cart,
-    subtotal,
-    shipping,
-    total,
-    categories,
-    cartCount: cart.reduce((sum, item) => sum + item.quantity, 0)
-  });
+  try {
+    const categories = await db.getCategories();
+    const cart = req.session.cart || [];
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = subtotal >= 1500 ? 0 : 100;
+    const total = subtotal + shipping;
+    
+    res.render('cart', {
+      title: 'Shopping Cart — ARODRO',
+      cart,
+      subtotal,
+      shipping,
+      total,
+      categories,
+      cartCount: cart.reduce((sum, item) => sum + item.quantity, 0)
+    });
+  } catch (err) {
+    console.error('Cart page error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO', categories: [], cartCount: 0 });
+  }
 });
 
 // Add to cart

@@ -47,6 +47,7 @@ app.use(async (req, res, next) => {
 
 // Routes
 app.use('/', require('./routes/index'));
+app.use('/health', require('./routes/health'));
 app.use('/products', require('./routes/products'));
 app.use('/cart', require('./routes/cart'));
 app.use('/checkout', require('./routes/checkout'));
@@ -72,6 +73,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).render('500', { 
     title: 'Server Error — ARODRO',
+    message: err.message,
     categories: [],
     cartCount: 0 
   });

@@ -18,7 +18,17 @@
 <section class="section categories-section">
   <div class="container">
     <div class="categories-grid">
-      <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+      <% if (typeof dbError !== 'undefined' && dbError) { %>
+  <section class="section" style="padding:40px 0;">
+    <div class="container">
+      <div class="alert alert-error" style="max-width:800px;margin:0 auto;text-align:center;">
+        <i class="fas fa-database" style="font-size:32px;margin-bottom:12px;display:block;"></i>
+        <h3 style="margin:0 0 8px;">Database connection issue</h3>
+        <p style="margin:0;opacity:.9;">Products are temporarily unavailable. We're working to restore them shortly.</p>
+      </div>
+    </div>
+  </section>
+<% } else if (typeof categories !== 'undefined' && categories.length > 0) { %>
         <% categories.forEach(cat => { %>
           <a href="/category/<%= cat.slug %>" class="category-card">
             <div class="category-icon">

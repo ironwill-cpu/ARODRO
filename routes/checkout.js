@@ -4,27 +4,32 @@ const db = require('../database');
 
 // Checkout page
 router.get('/', async (req, res) => {
-  const categories = await db.getCategories();
-  const cart = req.session.cart || [];
-  
-  if (cart.length === 0) return res.redirect('/cart');
-  
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal >= 1500 ? 0 : 60;
-  const discount = req.session.coupon ? req.session.coupon.discount : 0;
-  const total = Math.max(0, subtotal + shipping - discount);
-  
-  res.render('checkout', {
-    title: 'Checkout — ARODRO',
-    cart,
-    subtotal,
-    shipping,
-    discount,
-    total,
-    coupon: req.session.coupon || null,
-    categories,
-    cartCount: cart.reduce((sum, item) => sum + item.quantity, 0)
-  });
+  try {
+    const categories = await db.getCategories();
+    const cart = req.session.cart || [];
+    
+    if (cart.length === 0) return res.redirect('/cart');
+    
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = subtotal >= 1500 ? 0 : 60;
+    const discount = req.session.coupon ? req.session.coupon.discount : 0;
+    const total = Math.max(0, subtotal + shipping - discount);
+    
+    res.render('checkout', {
+      title: 'Checkout — ARODRO',
+      cart,
+      subtotal,
+      shipping,
+      discount,
+      total,
+      coupon: req.session.coupon || null,
+      categories,
+      cartCount: cart.reduce((sum, item) => sum + item.quantity, 0)
+    });
+  } catch (err) {
+    console.error('Checkout page error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO', categories: [], cartCount: 0 });
+  }
 });
 
 // Place order
@@ -37,16 +42,22 @@ router.post('/place', async (req, res) => {
     
     // Validate
     if (!customer_name || !customer_phone || !customer_address || !city) {
-      return res.render('checkout', {
-        title: 'Checkout — ARODRO',
-        cart,
-        subtotal: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        shipping: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) >= 1500 ? 0 : 100,
-        total: 0,
-        categories: await db.getCategories(),
-        cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
-        error: 'Please fill in all required fields'
-      });
+      try {
+        const cats = await db.getCategories();
+        return res.render('checkout', {
+          title: 'Checkout — ARODRO',
+          cart,
+          subtotal: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          shipping: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) >= 1500 ? 0 : 100,
+          total: 0,
+          categories: cats,
+          cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
+          error: 'Please fill in all required fields'
+        });
+      } catch (err) {
+        console.error('Checkout validation render error:', err.message);
+        return res.status(500).send('Server Error');
+      }
     }
     
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -103,7 +114,7 @@ router.get('/confirm/:orderId', async (req, res) => {
     const categories = await db.getCategories();
     const order = await db.getOrder(req.params.orderId);
     
-    if (!order) return res.status(404).send('Order not found');
+    if (!order) return res.status(404).render('404', { title: 'Order Not Found', categories, cartCount: 0 });
     
     res.render('confirm', {
       title: 'Order Confirmed — ARODRO',
@@ -112,8 +123,8 @@ router.get('/confirm/:orderId', async (req, res) => {
       cartCount: 0
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
+    console.error('Order confirmation error:', err.message);
+    res.status(500).render('500', { title: 'Server Error — ARODRO', categories: [], cartCount: 0 });
   }
 });
 
