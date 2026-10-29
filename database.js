@@ -105,7 +105,7 @@ async function initSqliteDb() {
 // Proxy all DB calls to the active module
 function proxy(name) {
   return async function(...args) {
-    if (usePg && dbModule && dbModule[name]) {
+    if (dbModule && dbModule[name]) {
       return dbModule[name](...args);
     }
     throw new Error('Database not initialized');
@@ -115,7 +115,7 @@ function proxy(name) {
 module.exports = {
   initDb,
   query: async (...args) => {
-    if (usePg && dbModule && dbModule.query) return dbModule.query(...args);
+    if (dbModule && dbModule.query) return dbModule.query(...args);
     throw new Error('Database not initialized');
   },
   getProducts: proxy('getProducts'),
