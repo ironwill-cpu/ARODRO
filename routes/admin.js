@@ -186,29 +186,29 @@ router.get('/products/edit/:id', async (req, res) => {
 
 router.post('/products/edit/:id', async (req, res) => {
   try {
-    // Auto-generate slug if not provided or empty
-    if (!req.body.slug || !req.body.slug.trim()) {
+    const originalImage = (await db.getProductById(req.params.id))?.image;
+    const newImage = req.body.image;
+    console.log('EDIT product', req.params.id, 'oldImagePrefix:', originalImage?.slice?.(0,80), 'newImagePrefix:', newImage?.slice?.(0,80));
+
+    if (req.body.slug && !req.body.slug.trim()) {
       req.body.slug = req.body.name.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '') || 'product-' + Date.now();
     }
-    // Handle image removal: if image is empty string, explicitly set to null
-    if (req.body.image === '') {
-      req.body.image = null;
-    }
-    // Handle images gallery: if empty, explicit null
-    if (req.body.images === '[]' || req.body.images === '') {
-      req.body.images = null;
-    }
+    if (req.body.image === '') req.body.image = null;
+    if (req.body.images === '[]' || req.body.images === '') req.body.images = null;
     await db.updateProduct(req.params.id, req.body);
-    res.redirect('/admin/products');
+
+    const after = await db.getProductById(req.params.id);
+    console.log('AFTER UPDATE product', req.params.id, 'imagePrefix:', after?.image?.slice?.(0,80));
+    res.redirect('/admin/products?saved=1');
   } catch (err) {
     console.error('Product update error:', err.message);
     const [product, categories] = await Promise.all([
       db.getProductById(req.params.id),
       db.getCategories()
     ]);
-    res.render('admin/product-form', { 
+    res.render('admin/product-form', {
       title: 'Edit — ARODRO Admin',
       product: { ...product, ...req.body },
       categories,
