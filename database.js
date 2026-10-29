@@ -88,8 +88,8 @@ async function initDb() {
       getProducts: () => proxySqliteQuery(sqliteDb, 'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = 1 ORDER BY p.created_at DESC'),
       getProduct: (slug) => proxySqliteQueryOne(sqliteDb, 'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ? LIMIT 1', [slug]),
       getProductById: (id) => proxySqliteQueryOne(sqliteDb, 'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ? LIMIT 1', [id]),
-      getCategories: () => proxySqliteQuery(sqliteDb, 'SELECT * FROM categories ORDER BY name'),
-      getCategory: (slug) => proxySqliteQueryOne(sqliteDb, 'SELECT * FROM categories WHERE slug = ? LIMIT 1', [slug]),
+      getCategories: () => proxySqliteQuery(sqliteDb, 'SELECT c.*, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.category_id = c.id GROUP BY c.id ORDER BY c.name'),
+      getCategory: (slug) => proxySqliteQueryOne(sqliteDb, 'SELECT c.*, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.category_id = c.id WHERE c.slug = ? GROUP BY c.id LIMIT 1', [slug]),
       getOrders: (status) => {
         let sql = 'SELECT * FROM orders';
         const params = [];

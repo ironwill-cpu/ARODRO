@@ -2,6 +2,18 @@
 
 document.addEventListener('DOMContentLoaded', function() {
 
+  // Broken image fallback -> show placeholder
+  document.querySelectorAll('.product-image img').forEach(img => {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'product-placeholder';
+    placeholder.innerHTML = '<i class="fas fa-gem"></i>';
+    img.parentNode.appendChild(placeholder);
+    img.addEventListener('error', () => {
+      img.classList.add('broken');
+      if (placeholder) placeholder.style.display = 'flex';
+    });
+  });
+
   // Dark / Light Mode Toggle
   const themeToggle = document.getElementById('themeToggle');
   const themeIcon = document.getElementById('themeIcon');
