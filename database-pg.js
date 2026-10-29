@@ -7,7 +7,7 @@ function getPool() {
   if (!pool) {
     // Support both connection string and individual params
     const url = process.env.SUPABASE_DB_URL;
-    const pgConfig = url ? { connectionString: url, ssl: { rejectUnauthorized: false } }
+    const pgConfig = url ? { connectionString: url, ssl: { rejectUnauthorized: false }, family: 4 }
       : {
           host: process.env.PGHOST || 'aws-0-ap-southeast-1.pooler.supabase.com',
           port: Number(process.env.PGPORT || 6543),
